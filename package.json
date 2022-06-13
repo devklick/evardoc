@@ -1,0 +1,30 @@
+{
+  "name": "evar-doc",
+  "version": "0.0.1",
+  "description": "Document your environment bariables with EvarDoc",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --inspect -r ts-node/register src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/devklick/evar-doc"
+  },
+  "keywords": [
+    "node",
+    "environment",
+    "variables",
+    "documentation"
+  ],
+  "author": "devklick",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^17.0.42",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.7.3"
+  },
+  "dependencies": {
+    "commander": "^9.3.0"
+  }
+}
