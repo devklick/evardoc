@@ -6,6 +6,11 @@ import * as fs from "fs/promises";
   =================================================================================================
 */
 
+/**
+ * Writes the formatted environment variable data to file
+ * @param content The formatted environment variable data to be written to file
+ * @param envFilePath The path to the env file where the content should be written.
+ */
 export const write = async (
   content: string,
   envFilePath: string

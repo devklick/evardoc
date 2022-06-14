@@ -9,33 +9,62 @@ import { EOL } from "os";
   The data returned from this module can be passed to the env-writer module if it's to be written to file.
   ========================================================================================================
 */
+
+const addComment = (lines: string[], key: string, value: unknown | null) => {
+  if (value) lines.push(`# ${key}: ${value}`);
+};
+const addEvar = (lines: string[], key: string, value: string | null) => {
+  lines.push(`${key}=${value ?? ""}`);
+};
+const addBlock = (
+  blocks: string[],
+  evar: ParsedEvar,
+  excludeVariableValues: boolean
+) => {
+  if (evar.errors.length) return;
+  const lines: string[] = [];
+  addComment(lines, EvarDocKeys.description, evar.description);
+  addComment(lines, EvarDocKeys.type, evar.type);
+  addComment(lines, EvarDocKeys.requirement, evar.requirement);
+  addComment(lines, EvarDocKeys.default, evar.default);
+  addComment(lines, EvarDocKeys.example, evar.example);
+  addEvar(lines, evar.name, excludeVariableValues ? null : evar.value);
+  blocks.push(lines.join(EOL));
+};
+
 /**
  * Formats the pased environment variable data
- * @param parsedEvars The parsed environment variables, including the comments that decorate them
+ * @param evarVariables The parsed environment variables, including the comments that decorate them
  * @param excludeVariableValues Whether or not the variable values should be excluded from the formatted data.
+ * @param templateEvarVariables The parsed variables from the existing template.
+ * This is intended to be specified when merging the environment files from the env file with the ones on the existing template
  * @returns The formatted environment variable, as a string, ready to be dumped to a file
  */
 export const format = (
-  parsedEvars: ParsedEvar[],
-  excludeVariableValues: boolean = false
+  evarVariables: ParsedEvar[],
+  excludeVariableValues: boolean = false,
+  templateEvarVariables: ParsedEvar[] | null = null
 ): string => {
   const blocks: string[] = [];
-  const addComment = (lines: string[], key: string, value: unknown | null) => {
-    if (value) lines.push(`# ${key}: ${value}`);
-  };
-  const addEvar = (lines: string[], key: string, value: string | null) => {
-    lines.push(`${key}=${value ?? ""}`);
-  };
-  parsedEvars.forEach((evar) => {
-    if (evar.errors.length) return;
-    const lines: string[] = [];
-    addComment(lines, EvarDocKeys.description, evar.description);
-    addComment(lines, EvarDocKeys.type, evar.type);
-    addComment(lines, EvarDocKeys.requirement, evar.requirement);
-    addComment(lines, EvarDocKeys.default, evar.default);
-    addComment(lines, EvarDocKeys.example, evar.example);
-    addEvar(lines, evar.name, excludeVariableValues ? null : evar.value);
-    blocks.push(lines.join(EOL));
+
+  // If we variables from an existing template, they come first.
+  // Any variables from the environment file get appended to the bottom of the content
+  if (templateEvarVariables)
+    templateEvarVariables.forEach((evar) =>
+      addBlock(blocks, evar, excludeVariableValues)
+    );
+
+  // For each of the actual environment variables,
+  // if we have existing template variables and the variable is not already in the template,
+  // or we dont have existing template variables, add the variable as a new block
+  evarVariables.forEach((evar) => {
+    if (
+      !templateEvarVariables ||
+      (templateEvarVariables &&
+        !templateEvarVariables.some((e) => e.name === evar.name))
+    ) {
+      addBlock(blocks, evar, excludeVariableValues);
+    }
   });
   return blocks.join(EOL + EOL);
 };
@@ -44,7 +73,11 @@ export const format = (
  * Formats the environment variable data and excludes the variable values.
  * This is intended to be used when creating an .env template
  * @param parsedEvars The parsed environment variables, including the comments that decorate them
+ * @param existingTemplateParsedEvars The parsed variables from the existing template.
+ * This is intended to be specified when merging the environment files from the env file with the ones on the existing template
  * @returns The formatted environment variable, as a string, ready to be dumped to a file
  */
-export const formatTemplate = (parsedEvars: ParsedEvar[]) =>
-  format(parsedEvars, true);
+export const formatTemplate = (
+  parsedEvars: ParsedEvar[],
+  existingTemplateParsedEvars: ParsedEvar[] | null = null
+) => format(parsedEvars, true, existingTemplateParsedEvars);

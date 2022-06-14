@@ -40,11 +40,17 @@ program
   .command(CreateTemplate.command)
   .description(CreateTemplate.description)
   .argument("<string>", "The path to the environment file")
-  .action(async (envFilePath: string) => {
+  .option(
+    "-o, --overwrite",
+    "Whether or not the new template should overwrite the existing one, if one exists. Defaults to false, meaning any new environment variables will be appended to the existing template, if one exists",
+    false
+  )
+  .action(async (envFilePath, { overwrite }: { overwrite: boolean }) => {
     const parsed = await parse(envFilePath);
+    const existing = overwrite ? null : await parse("template.env");
     if (!parsed.success)
       throw new Error("Parsing failed. Worry about this later");
-    const formatted = formatTemplate(parsed.variables);
+    const formatted = formatTemplate(parsed.variables, existing?.variables);
     await write(formatted, "template.env");
   });
 
