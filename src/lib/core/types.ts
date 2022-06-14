@@ -70,3 +70,16 @@ export type EvarDocBlock = {
    */
   default: unknown | null;
 };
+
+export type Evar = EvarDocBlock & {
+  /**
+   * The name of the envrionemnt variable.
+   * i.e. the value before the `=`.
+   */
+  name: string;
+  /**
+   * The value of the environment variable, if there is one.
+   * i.e the value after the `=`
+   */
+  value: string | null;
+};

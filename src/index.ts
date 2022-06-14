@@ -1,5 +1,7 @@
 import { program } from "commander";
-import { parse } from "./core/env-parser";
+import { format, formatTemplate } from "./lib/core/env-formatter";
+import { parse } from "./lib/core/env-parser";
+import { write } from "./lib/core/env-writer";
 
 type Command = {
   command: string;
@@ -28,9 +30,10 @@ program
   .argument("<string>", "The path to the environment file")
   .action(async (envFilePath: string) => {
     const parsed = await parse(envFilePath);
-    // use env-formatter module to format the parsed environment file data
-    // use env-writer module to re-write the same env file with the formatted data
-    console.log(parsed);
+    if (!parsed.success)
+      throw new Error("Parsing failed. Worry about this later");
+    const formatted = format(parsed.variables);
+    await write(formatted, envFilePath);
   });
 
 program
@@ -39,9 +42,10 @@ program
   .argument("<string>", "The path to the environment file")
   .action(async (envFilePath: string) => {
     const parsed = await parse(envFilePath);
-    // use env-formatter module to format the parsed environment file data
-    // use env-writer module to write the environment file data (excluding variable values) to a template.env file
-    console.log(parsed);
+    if (!parsed.success)
+      throw new Error("Parsing failed. Worry about this later");
+    const formatted = formatTemplate(parsed.variables);
+    await write(formatted, "template.env");
   });
 
 program.parse();

@@ -1,5 +1,6 @@
 import * as fs from "fs/promises";
 import {
+  Evar,
   EvarDocBlock,
   EvarDocKey,
   EvarRequirement,
@@ -23,7 +24,8 @@ type ParseErrorCode =
   | "duplicate-doc-key"
   | "malformed-environment-variable"
   | "bad-evar-doc-value"
-  | "non-evar-doc-comment";
+  | "non-evar-doc-comment"
+  | "empty-line";
 
 /**
  * The severity of the error
@@ -52,7 +54,11 @@ export type ParseError = {
  * The types of error that are handled during parsing.
  */
 const errorType: Record<
-  "dupKey" | "malformedEvar" | "nonEvarDocComment" | "badEvarDocValue",
+  | "dupKey"
+  | "malformedEvar"
+  | "nonEvarDocComment"
+  | "badEvarDocValue"
+  | "emptyLine",
   ParseError
 > = {
   dupKey: {
@@ -79,15 +85,18 @@ const errorType: Record<
     message:
       "The value applied for the EvarDoc comment is not a valid value. Unable to parse it.",
   },
+  emptyLine: {
+    code: "empty-line",
+    message: "The line contains no data. Ignoring it",
+    severity: "warning",
+  },
 };
 
 /**
  * The result from processing a single environment bariable doc block, including
  * any errors that may have occured during the parsing process.
  */
-export type ParsedEvar = EvarDocBlock & {
-  key: string;
-  value: string | null;
+export type ParsedEvar = Evar & {
   errors: ParseError[];
 };
 
@@ -129,7 +138,7 @@ const isComment = (line: string) => !!line.match(commentStartRegex);
  * @param line The line to be checked
  * @returns True when the string contains only whit space, otherwise false.
  */
-const isWhiteSpace = (line: string) => line && line !== line.trim();
+const isNullOrWhiteSpace = (line: string) => !line || line !== line.trim();
 
 /**
  * Reads the environment file and returns the parsed contents
@@ -174,7 +183,7 @@ const getRawEvars = (content: string): Array<RawEvar> => {
 
   let current = initCurrent();
   for (const line of content.split(EOL)) {
-    if (isWhiteSpace(line)) {
+    if (isNullOrWhiteSpace(line)) {
       continue;
     } else if (isComment(line)) {
       current.comments.push(line);
@@ -196,7 +205,7 @@ const parseRawEvar = (rawEvar: RawEvar): ParsedEvar => {
   const definition = parseDefinition(rawEvar.definition);
   const comments = parseComments(rawEvar.comments);
   return {
-    key: definition.key,
+    name: definition.key,
     value: definition.value,
     default: findComment(comments, "default"),
     description: findComment(comments, "description"),
