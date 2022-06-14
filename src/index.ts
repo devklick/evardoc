@@ -3,6 +3,8 @@ import { format, formatTemplate } from "./lib/core/env-formatter";
 import { parse } from "./lib/core/env-parser";
 import { write } from "./lib/core/env-writer";
 
+const packageVersion = require("../package.json").version;
+
 type Command = {
   command: string;
   description: string;
@@ -22,7 +24,7 @@ const CreateTemplate: Command = {
 program
   .name("EvarDoc")
   .description("Documentation of environment variables made easy")
-  .version("0.0.0");
+  .version(packageVersion);
 
 program
   .command(Refactor.command)
