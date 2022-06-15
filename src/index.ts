@@ -1,12 +1,4 @@
 import { program } from "commander";
-import { commands } from "./lib/commands";
+import cli from "./lib/cli";
 
-program
-  .name("EvarDoc")
-  .description("Documentation of environment variables made easy")
-  .version("0.0.0");
-
-commands.refactor(program);
-commands.template(program);
-
-program.parse();
+cli(program, "0.0.0");

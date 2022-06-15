@@ -1,6 +1,6 @@
-import { format } from "../core/env-formatter";
-import { parse } from "../core/env-parser";
-import { write } from "../core/env-writer";
+import { format } from "../../core/env-formatter";
+import { parse } from "../../core/env-parser";
+import { write } from "../../core/env-writer";
 import registerCommand from "./registerCommand";
 import {
   EvarDocCommand,
@@ -25,7 +25,7 @@ const action: EvarDocCommandAction = async (envFilePath) => {
 /**
  * The metatdata assciated with the command.
  */
-const refactorCommandMetadata: EvarDocCommandMetadata = {
+export const refactorCommandMetadata: EvarDocCommandMetadata = {
   command: "refactor",
   description: "Refactor an environment file, applying opinionated formatting",
   argument: {

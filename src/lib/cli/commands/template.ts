@@ -1,6 +1,6 @@
-import { formatTemplate } from "../core/env-formatter";
-import { parse } from "../core/env-parser";
-import { write } from "../core/env-writer";
+import { formatTemplate } from "../../core/env-formatter";
+import { parse } from "../../core/env-parser";
+import { write } from "../../core/env-writer";
 import registerCommand from "./registerCommand";
 import {
   EvarDocCommand,
@@ -34,8 +34,8 @@ const action: EvarDocCommandAction<Options> = async (
 /**
  * The metatdata assciated with the command.
  */
-const templateCommandMetadata: EvarDocCommandMetadata<Options> = {
-  command: "temlate",
+export const templateCommandMetadata: EvarDocCommandMetadata<Options> = {
+  command: "template",
   description: `Create a new environment file template from an existing environment file. 
       Takes the EvarDoc comments and environment variable names (not values) from the environment file, formats them, and writes them to a template file.`,
   argument: {

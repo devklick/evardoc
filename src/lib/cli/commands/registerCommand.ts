@@ -16,16 +16,15 @@ const registerCommand = <Options>(
   program: Command,
   metadata: EvarDocCommandMetadata<Options>
 ) => {
-  program
+  const _program = program
     .command(metadata.command)
     .description(metadata.description)
-    .argument(argName(metadata.argument), metadata.description);
+    .argument(argName(metadata.argument), metadata.description)
+    .action(metadata.action);
 
   metadata.options?.forEach((option) => {
-    program.option(optionFlags(option), option.description, option.default);
+    _program.option(optionFlags(option), option.description, option.default);
   });
-
-  program.action(metadata.action);
 };
 
 export default registerCommand;
