@@ -21,7 +21,7 @@ const addBlock = (
   evar: ParsedEvar,
   excludeVariableValues: boolean
 ) => {
-  if (evar.errors.length) return;
+  if (evar.errors.some((e) => e.severity !== "warning")) return;
   const lines: string[] = [];
   addComment(lines, EvarDocKeys.description, evar.description);
   addComment(lines, EvarDocKeys.type, evar.type);

@@ -1,8 +1,8 @@
 import * as fs from "fs/promises";
 import {
   Evar,
-  EvarDocBlock,
   EvarDocKey,
+  EvarDocKeys,
   EvarRequirement,
   EvarType,
   isEvarDocKey,
@@ -77,7 +77,7 @@ const errorType: Record<
     code: "non-evar-doc-comment",
     severity: "warning",
     message:
-      "The comment does not appear to be an EvarDoc doc comment. Ignoring it",
+      "The comment does not appear to be an EvarDoc doc comment. Ignoring it.",
   },
   badEvarDocValue: {
     code: "bad-evar-doc-value",
@@ -87,7 +87,7 @@ const errorType: Record<
   },
   emptyLine: {
     code: "empty-line",
-    message: "The line contains no data. Ignoring it",
+    message: "The line contains no data. Ignoring it.",
     severity: "warning",
   },
 };
@@ -125,14 +125,14 @@ export type ParseResult = {
  *  - "&nbsp;&nbsp;&nbsp;&nbsp;#"
  *  - "&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;"
  */
-const commentStartRegex = new RegExp("^[ ]*[#][ ]*");
+const commentPrefixRegex = new RegExp("^[ ]*[#][ ]*");
 
 /**
  * Checks if the given string appears to be a comment.
  * @param line The line to be checked
  * @returns True when the line appears to be a comment based on the `commentStartRegex`, otherwise false.
  */
-const isComment = (line: string) => !!line.match(commentStartRegex);
+const isComment = (line: string) => !!line.match(commentPrefixRegex);
 /**
  * Checks if the given string appears to contain only white space
  * @param line The line to be checked
@@ -148,8 +148,8 @@ export const parse = async (envFilePath: string): Promise<ParseResult> => {
   const content = await fs.readFile(envFilePath, "utf-8");
   const rawEvars = getRawEvars(content);
   const variables = rawEvars.map((rawEvar) => parseRawEvar(rawEvar));
-  const success = !!variables.find(
-    (p) => !p.errors.find((e) => e.severity === "fatal")
+  const success = variables.some(
+    (p) => !p.errors.find((e) => e.severity !== "warning")
   );
 
   return { success, variables };
@@ -328,6 +328,21 @@ type ParsedEvarComment = {
   errors: ParseError[];
 };
 
+type MyType = {
+  value: string;
+};
+const test = () => {
+  let optionalThing: MyType | null = null;
+
+  if (true) {
+    optionalThing = { value: "some value" };
+  }
+
+  if (true) {
+    optionalThing.value;
+  }
+};
+
 /**
  * Parses the comments that decorates an environment variable, regardless of whether or not they are EvarDoc comments.
  *
@@ -337,26 +352,80 @@ type ParsedEvarComment = {
  */
 const parseComments = (comments: string[]): ParsedEvarComment[] => {
   const parsedComments: ParsedEvarComment[] = [];
+
+  // To support multi-lin descriptions, we need to keep track of the description comment
+  let processingDescription = false;
+  let descriptionComment: ParsedEvarComment | null = null;
+
   for (const comment of comments) {
     const parsedComment = parseComment(comment);
 
-    // If the comment that we've just parsed is a known EvarDoc comment
-    // and already exists in the parsed comments list, it's a duplicate
-    if (
-      parsedComment.key &&
-      isEvarDocKey(parsedComment.key) &&
-      parsedComments.some(
-        (c) =>
-          !c.errors.length &&
-          c.key?.toLowerCase() === parsedComment.key?.toLowerCase()
-      )
-    ) {
+    if (isDuplicateEvarDocComment(parsedComment, parsedComments)) {
       parsedComment.errors.push(errorType.dupKey);
     }
+
+    [descriptionComment, processingDescription] = maybeAppendToDescription(
+      parsedComment,
+      descriptionComment,
+      processingDescription
+    );
+
     parsedComments.push(parsedComment);
   }
 
   return parsedComments;
+};
+
+/**
+ * Checks If the comment that we've just parsed is a known EvarDoc comment and already exists in the list of comments.
+ * @param comment The comment to be checked
+ * @param comments The list of comments to be checked against
+ * @returns True if the comment key already exists, otherwise false.
+ */
+const isDuplicateEvarDocComment = (
+  comment: ParsedEvarComment,
+  comments: ParsedEvarComment[]
+): boolean =>
+  !!comment.key &&
+  isEvarDocKey(comment.key) &&
+  comments.some(
+    (c) =>
+      !c.errors.length && c.key?.toLowerCase() === comment.key?.toLowerCase()
+  );
+
+/**
+ * Updates the description comment value by appending the parsed comment value
+ * if `processingDescription` is true and parsedComment is not an EvarDoc comment.
+ * @param comment The comment to maybe be appended to the description
+ * @param descriptionComment The comment that contains the description
+ * @param processingDescription Whether or not the description is currently being processed
+ */
+const maybeAppendToDescription = (
+  comment: ParsedEvarComment,
+  descriptionComment: ParsedEvarComment | null,
+  processingDescription: boolean
+): [ParsedEvarComment | null, boolean] => {
+  // If we've just parsed the description, set the vars to indicate this
+  if (comment.key === EvarDocKeys.description) {
+    descriptionComment = comment;
+    processingDescription = true;
+  }
+  // otherwise if we're currently processing the description and the parsed
+  // comment IS NOT an EvarDoc comment, its part of a multi-line description
+  else if (
+    processingDescription &&
+    descriptionComment &&
+    comment.errors.some((e) => e.code === "non-evar-doc-comment")
+  ) {
+    descriptionComment.value = `${descriptionComment.value}${EOL}${comment.key}`;
+  }
+  // Otherwise if we're current processing the description and the parsed
+  // comment IS an EvarDoc comment, we've finished processing the description
+  else if (processingDescription && comment.key && isEvarDocKey(comment.key)) {
+    processingDescription = false;
+  }
+
+  return [descriptionComment, processingDescription];
 };
 
 /**
@@ -370,13 +439,16 @@ const parseComment = (comment: string): ParsedEvarComment => {
     key: null,
     value: null,
   };
+  // expecting something like:
+  // # description: some info (valid EvarDoc comment)
+  // # some other non-evar doc comment
   const split = comment
-    .replace(commentStartRegex, "")
-    .split(":")
+    .replace(commentPrefixRegex, "")
+    .split(/:(.*)/s) // split at the first semicolon
     .map((c) => c.trim()) // trim white space
     .filter((c) => c); // ignore empty values
 
-  if (!split.length) {
+  if (split.length !== 2) {
     parsed.key = comment;
     parsed.errors.push(errorType.nonEvarDocComment);
     return parsed;
