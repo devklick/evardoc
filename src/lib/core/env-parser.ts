@@ -1,7 +1,6 @@
 import * as fs from "fs/promises";
 import {
   Evar,
-  EvarDocBlock,
   EvarDocKey,
   EvarRequirement,
   EvarType,
@@ -77,7 +76,7 @@ const errorType: Record<
     code: "non-evar-doc-comment",
     severity: "warning",
     message:
-      "The comment does not appear to be an EvarDoc doc comment. Ignoring it",
+      "The comment does not appear to be an EvarDoc doc comment. Ignoring it.",
   },
   badEvarDocValue: {
     code: "bad-evar-doc-value",
@@ -87,7 +86,7 @@ const errorType: Record<
   },
   emptyLine: {
     code: "empty-line",
-    message: "The line contains no data. Ignoring it",
+    message: "The line contains no data. Ignoring it.",
     severity: "warning",
   },
 };
@@ -125,14 +124,14 @@ export type ParseResult = {
  *  - "&nbsp;&nbsp;&nbsp;&nbsp;#"
  *  - "&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;"
  */
-const commentStartRegex = new RegExp("^[ ]*[#][ ]*");
+const commentPrefixRegex = new RegExp("^[ ]*[#][ ]*");
 
 /**
  * Checks if the given string appears to be a comment.
  * @param line The line to be checked
  * @returns True when the line appears to be a comment based on the `commentStartRegex`, otherwise false.
  */
-const isComment = (line: string) => !!line.match(commentStartRegex);
+const isComment = (line: string) => !!line.match(commentPrefixRegex);
 /**
  * Checks if the given string appears to contain only white space
  * @param line The line to be checked
@@ -148,8 +147,8 @@ export const parse = async (envFilePath: string): Promise<ParseResult> => {
   const content = await fs.readFile(envFilePath, "utf-8");
   const rawEvars = getRawEvars(content);
   const variables = rawEvars.map((rawEvar) => parseRawEvar(rawEvar));
-  const success = !!variables.find(
-    (p) => !p.errors.find((e) => e.severity === "fatal")
+  const success = variables.some(
+    (p) => !p.errors.find((e) => e.severity !== "warning")
   );
 
   return { success, variables };
@@ -370,8 +369,11 @@ const parseComment = (comment: string): ParsedEvarComment => {
     key: null,
     value: null,
   };
+  // expecting something like:
+  // # description: some info (valid EvarDoc comment)
+  // # some other non-evar doc comment
   const split = comment
-    .replace(commentStartRegex, "")
+    .replace(commentPrefixRegex, "")
     .split(":")
     .map((c) => c.trim()) // trim white space
     .filter((c) => c); // ignore empty values
