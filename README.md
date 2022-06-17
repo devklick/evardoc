@@ -12,7 +12,7 @@
 
 # What it is
 
-A CLI that builds a template of your environment variables file(s) so (excluding the variable values) they can be documented committed to source control to aid other developers working on the codebase. Additionally, it can format your environment file(s) to apply a consistent format.
+A CLI that builds a template of your environment variables file(s) (excluding the variable values) so they can be documented and committed to source control to help other developers working on the codebase. Additionally, it can format your environment file(s) to apply a consistent, opinionated format.
 
 # Supports the following documentation
 - `description` - A description that explains the what the environment variable is
@@ -20,6 +20,8 @@ A CLI that builds a template of your environment variables file(s) so (excluding
 - `requirement` - The level of requirement for the variable (`required` or `optional`)
 - `example` An example of the variable value
 - `default` - A default value that's applied in the code that uses the variable
+
+Each comment key is optional, and each can only be used once per envrionment variable.
 
 # Example Documented Environment File
 ```
@@ -60,19 +62,30 @@ Currently the best way to do this is by checking out the repository and running 
 ```
 npm run dev format .env
 ```
+Or, you can compile the typescript and execute the javascript directly
+```
+tsc && node src/index.js format .env
+```
 This executes the `format` command against the `.env` file.
+
+
 # Creating an environment file template
 Currently, the best way to do this is by checking out the repository and running the following:
 ```
 npm run dev template .env
 ```
+Or, you can compile the typescript and execute the javascript directly
+```
+tsc && node src/index.js template .env
+```
 This executes the `template` command against the `.env` file.
 
 Optionally, you can specify the `-o` (`--overwrite`) flag to indicate that you want to completely overwrite any existing template file. 
 
-**NOTE:** if other people work in the same repository, it is recommended to avoid this and use the default merge approach, where ony new variables from the `.env` file will be added to the bottom of the existing template. 
+**NOTE:** If other people work in the same repository, it is recommended to avoid this and use the default merge approach, where ony new variables from the `.env` file will be added to the bottom of the existing template. Otherwise, you may find that, since you and your teammates's may only use a subset of supported variables, you'll each end up creating and committing different templates.
 
 **NOTE:** The main reason for creating an environment file template is committing to your repository and sharing with other users, without worrying about sharing variable values. As such, you will likely need to add your `template.env` to your `.gitignore` rules.
+
 
 # Future Plans
 - [ ] Option to specify template file name (currently only supports hardcoded `template.env`)
