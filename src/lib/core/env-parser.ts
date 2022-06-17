@@ -23,8 +23,8 @@ import { EOL } from "os";
 type ParseErrorCode =
   | "duplicate-doc-key"
   | "malformed-environment-variable"
-  | "bad-evar-doc-value"
-  | "non-evar-doc-comment"
+  | "bad-evardoc-value"
+  | "non-evardoc-comment"
   | "empty-line";
 
 /**
@@ -74,13 +74,13 @@ const errorType: Record<
       'The environment variable does not appear to be a valid value in the format of "key=value". Unable to parse it.',
   },
   nonEvarDocComment: {
-    code: "non-evar-doc-comment",
+    code: "non-evardoc-comment",
     severity: "warning",
     message:
       "The comment does not appear to be an EvarDoc doc comment. Ignoring it.",
   },
   badEvarDocValue: {
-    code: "bad-evar-doc-value",
+    code: "bad-evardoc-value",
     severity: "fatal",
     message:
       "The value applied for the EvarDoc comment is not a valid value. Unable to parse it.",
@@ -421,7 +421,7 @@ const maybeAppendToDescription = (
   else if (
     processingDescription &&
     descriptionComment &&
-    comment.errors.some((e) => e.code === "non-evar-doc-comment")
+    comment.errors.some((e) => e.code === "non-evardoc-comment")
   ) {
     descriptionComment = appendToDescription(descriptionComment, comment);
   }

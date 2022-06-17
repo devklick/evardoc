@@ -1,5 +1,5 @@
 {
-  "name": "evar-doc",
+  "name": "evardoc",
   "version": "0.0.1",
   "description": "Document your environment variables with EvarDoc",
   "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "github.com/devklick/evar-doc"
+    "url": "github.com/devklick/evardoc"
   },
   "keywords": [
     "node",
