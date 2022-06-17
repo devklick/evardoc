@@ -47,7 +47,7 @@ const addBlock = (
  * This is intended to be specified when merging the environment files from the env file with the ones on the existing template
  * @returns The formatted environment variable, as a string, ready to be dumped to a file
  */
-export const format = (
+export const applyFormat = (
   evarVariables: ParsedEvar[],
   excludeVariableValues: boolean = false,
   templateEvarVariables: ParsedEvar[] | null = null
@@ -87,4 +87,4 @@ export const format = (
 export const formatTemplate = (
   parsedEvars: ParsedEvar[],
   existingTemplateParsedEvars: ParsedEvar[] | null = null
-) => format(parsedEvars, true, existingTemplateParsedEvars);
+) => applyFormat(parsedEvars, true, existingTemplateParsedEvars);

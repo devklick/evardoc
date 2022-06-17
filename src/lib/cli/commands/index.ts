@@ -1,4 +1,4 @@
-import refactor from "./refactor";
+import format from "./format";
 import template from "./template";
 
-export default { refactor, template };
+export default { format, template };

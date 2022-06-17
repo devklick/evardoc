@@ -17,7 +17,7 @@ const cli = (program: Command, version: string): void => {
     .description(cliMetadata.description)
     .version(version);
 
-  commands.refactor(program);
+  commands.format(program);
   commands.template(program);
 
   program.parse();
