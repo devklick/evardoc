@@ -138,7 +138,7 @@ const isComment = (line: string) => !!line.match(commentPrefixRegex);
  * @param line The line to be checked
  * @returns True when the string contains only whit space, otherwise false.
  */
-const isNullOrWhiteSpace = (line: string) => !line || line !== line.trim();
+const isNullOrWhiteSpace = (line: string) => !line || line.trim() === "";
 
 /**
  * Reads the environment file and returns the parsed contents
@@ -208,12 +208,18 @@ const parseRawEvar = (rawEvar: RawEvar): ParsedEvar => {
     name: definition.key,
     value: definition.value,
     default: findComment(comments, "default"),
-    description: findComment(comments, "description"),
+    description: findDescription(comments),
     example: findComment(comments, "example"),
     requirement: findRequirementComment(comments),
     type: findTypeComment(comments),
     errors: definition.errors.concat(comments.flatMap((c) => c.errors)),
   };
+};
+
+const findDescription = (comments: ParsedEvarComment[]): string[] | null => {
+  const description = findComment(comments, "description");
+  if (!description) return null;
+  return typeof description === "string" ? [description] : description;
 };
 
 /**
@@ -252,7 +258,7 @@ const findTypeComment = (comments: ParsedEvarComment[]): EvarType | null => {
 const findComment = (
   comments: ParsedEvarComment[],
   keyType: EvarDocKey
-): string | null => {
+): string | string[] | null => {
   const matchingType = comments.filter((c) => c.key === keyType);
   return matchingType.length === 1 ? matchingType[0].value : null;
 };
@@ -321,7 +327,7 @@ type ParsedEvarComment = {
    * The value of the comment (i.e. everything after the first `:`, if any).
    * If the comment doesnt have a semi-colon, it's not an EvarDoc comment, so there will be no value listed here.
    */
-  value: string | null;
+  value: string | string[] | null;
   /**
    * The errors that occurred while parsing the comment, if any.
    */
@@ -417,7 +423,7 @@ const maybeAppendToDescription = (
     descriptionComment &&
     comment.errors.some((e) => e.code === "non-evar-doc-comment")
   ) {
-    descriptionComment.value = `${descriptionComment.value}${EOL}${comment.key}`;
+    descriptionComment = appendToDescription(descriptionComment, comment);
   }
   // Otherwise if we're current processing the description and the parsed
   // comment IS an EvarDoc comment, we've finished processing the description
@@ -426,6 +432,20 @@ const maybeAppendToDescription = (
   }
 
   return [descriptionComment, processingDescription];
+};
+
+const appendToDescription = (
+  description: ParsedEvarComment,
+  comment: ParsedEvarComment
+): ParsedEvarComment => {
+  if (description.value && !Array.isArray(description.value))
+    description.value = [description.value];
+
+  if (description.value && Array.isArray(description.value) && comment.value)
+    description.value.push(
+      typeof comment.value == "string" ? comment.value : comment.value.join(" ")
+    );
+  return description;
 };
 
 /**
@@ -449,7 +469,7 @@ const parseComment = (comment: string): ParsedEvarComment => {
     .filter((c) => c); // ignore empty values
 
   if (split.length !== 2) {
-    parsed.key = comment;
+    parsed.value = split[0];
     parsed.errors.push(errorType.nonEvarDocComment);
     return parsed;
   }

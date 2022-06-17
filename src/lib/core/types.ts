@@ -52,8 +52,8 @@ export type EvarType = typeof EvarTypes[keyof typeof EvarTypes];
  * @param value The value to be checked
  * @returns
  */
-export const isEvarType = (value: string): value is EvarType =>
-  value in EvarTypes;
+export const isEvarType = (value: unknown): value is EvarType =>
+  typeof value === "string" && value in EvarTypes;
 
 /**
  * The level of requirement for the environment variable
@@ -68,8 +68,8 @@ const EvarRequirements = {
  */
 export type EvarRequirement =
   typeof EvarRequirements[keyof typeof EvarRequirements];
-export const isEvarRequirement = (value: string): value is EvarRequirement =>
-  value in EvarRequirements;
+export const isEvarRequirement = (value: unknown): value is EvarRequirement =>
+  typeof value === "string" && value in EvarRequirements;
 
 /**
  * The structure of the environment variable metadata
@@ -78,7 +78,7 @@ export type EvarDocBlock = {
   /**
    * The description that explains the what the environment variable is
    */
-  description: string | null;
+  description: string[] | null;
   /**
    * The type of data that the envrionment variable represents
    */

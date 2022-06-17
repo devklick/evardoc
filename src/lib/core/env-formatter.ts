@@ -11,7 +11,8 @@ import { EOL } from "os";
 */
 
 const addComment = (lines: string[], key: string, value: unknown | null) => {
-  if (value) lines.push(`# ${key}: ${value}`);
+  const formattedValue = Array.isArray(value) ? value.join(`${EOL}# `) : value;
+  if (value) lines.push(`# ${key}: ${formattedValue}`);
 };
 const addEvar = (lines: string[], key: string, value: string | null) => {
   lines.push(`${key}=${value ?? ""}`);
