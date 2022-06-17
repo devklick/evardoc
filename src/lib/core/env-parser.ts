@@ -434,6 +434,12 @@ const maybeAppendToDescription = (
   return [descriptionComment, processingDescription];
 };
 
+/**
+ * Appends the `comment` to the `description` by adding it's value into the descriptions array of values.
+ * @param description The description which is to be appended to.
+ * @param comment The comment to be appended
+ * @returns The updated description
+ */
 const appendToDescription = (
   description: ParsedEvarComment,
   comment: ParsedEvarComment

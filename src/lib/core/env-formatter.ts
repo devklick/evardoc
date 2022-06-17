@@ -11,8 +11,14 @@ import { EOL } from "os";
 */
 
 const addComment = (lines: string[], key: string, value: unknown | null) => {
-  const formattedValue = Array.isArray(value) ? value.join(`${EOL}# `) : value;
-  if (value) lines.push(`# ${key}: ${formattedValue}`);
+  if (value) {
+    // In some cases the value is an array. We need to convert that to strings with line breaks,
+    // where each line (other than the first), is preceeded with a comment hash
+    const formattedValue = Array.isArray(value)
+      ? value.join(`${EOL}# `)
+      : value;
+    lines.push(`# ${key}: ${formattedValue}`);
+  }
 };
 const addEvar = (lines: string[], key: string, value: string | null) => {
   lines.push(`${key}=${value ?? ""}`);
