@@ -50,6 +50,10 @@ SOME_BOOLEAN=
 # example: something
 SOME_STRING=
 ```
+**NOTES**:
+- This has been through the formatter, so the order of doc keys, the white space etc are all consistent. 
+- Multi-line comments are supported for `description` only
+
 
 # Formatting your environment file
 Currently the best way to do this is by checking out the repository and running the following
@@ -76,3 +80,4 @@ Optionally, you can specify the `-o` (`--overwrite`) flag to indicate that you w
 - [ ] Support updating existing template variables using the default merge (non overwrite) approach
 - [ ] Publish as an npm package
 - [ ] VSCode extension to apply syntax-highlighting and  auto-complete for EvarDoc keywords, as well as format on save
+- [ ] Option to automatically add Environment Variables markdown table to  readme
