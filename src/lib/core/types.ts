@@ -7,7 +7,7 @@ export const EvarDocKeys = {
    */
   description: "description",
   /**
-   * The type of data that the envrionment variable represents
+   * The type of data that the environment variable represents
    */
   type: "type",
   /**
