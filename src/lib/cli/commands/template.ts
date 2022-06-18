@@ -42,7 +42,8 @@ export const templateCommandMetadata: EvarDocCommandMetadata<Options> = {
     name: "src",
     description:
       "The path to the environment to be used as the source of data for the template",
-    required: true,
+    required: false,
+    default: ".env",
   },
   options: [
     {

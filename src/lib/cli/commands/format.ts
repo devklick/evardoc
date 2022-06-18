@@ -31,7 +31,8 @@ export const formatCommandMetadata: EvarDocCommandMetadata = {
   argument: {
     name: "src",
     description: "The path to the environment file to be formatted",
-    required: true,
+    required: false,
+    default: ".env",
   },
   action,
 };

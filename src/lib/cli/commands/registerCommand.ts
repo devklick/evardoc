@@ -19,7 +19,11 @@ const registerCommand = <Options>(
   const _program = program
     .command(metadata.command)
     .description(metadata.description)
-    .argument(argName(metadata.argument), metadata.description)
+    .argument(
+      argName(metadata.argument),
+      metadata.argument.description,
+      metadata.argument.default
+    )
     .action(metadata.action);
 
   metadata.options?.forEach((option) => {

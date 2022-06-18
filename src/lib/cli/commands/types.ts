@@ -26,4 +26,5 @@ export type EvarDocCommandArgument = {
   name: string;
   description: string;
   required: boolean;
+  default?: unknown;
 };
