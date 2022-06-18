@@ -16,7 +16,7 @@ import {
 const action: EvarDocCommandAction = async (envFilePath) => {
   console.log("Executing format command");
   const parsed = await parse(envFilePath);
-  if (!parsed.success)
+  if (!parsed?.success)
     throw new Error("Parsing failed. Worry about this later");
   const formatted = applyFormat(parsed.variables);
   await write(formatted, envFilePath);

@@ -10,6 +10,7 @@ import {
 
 export type Options = {
   overwrite: boolean;
+  destination: string;
 };
 
 /**
@@ -21,14 +22,14 @@ export type Options = {
  */
 const action: EvarDocCommandAction<Options> = async (
   envFilePath,
-  { overwrite }
+  { overwrite, destination }
 ) => {
   const parsed = await parse(envFilePath);
   const existing = overwrite ? null : await parse("template.env");
-  if (!parsed.success)
+  if (!parsed?.success)
     throw new Error("Parsing failed. Worry about this later");
   const formatted = formatTemplate(parsed.variables, existing?.variables);
-  await write(formatted, "template.env");
+  await write(formatted, destination);
 };
 
 /**
@@ -52,6 +53,13 @@ export const templateCommandMetadata: EvarDocCommandMetadata<Options> = {
       description: `Whether or not the existing template (if one exists), should be overwritten with the template content based on the environment file
         Without this option, only new environment variable information will be written to the bottom of the template, if one already exists`,
       default: false,
+      required: false,
+    },
+    {
+      shortName: "d",
+      fullName: "destination",
+      description: "The file that he template should be saved to",
+      default: "template.env",
       required: false,
     },
   ],
