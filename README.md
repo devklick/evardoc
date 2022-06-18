@@ -89,7 +89,7 @@ The `template` command allows you create a formatted environment variable templa
 
 The template will be formatted using the `format` command and written to a file called `template.env`.
 
-Optionally, you can specify the `-o` (`--overwrite`) flag to force any existing `template.env` file to be overwritten with the contents of the new template.
+Optionally, you can specify the `-o` (`--overwrite`) flag to force any existing `template.env` file to be overwritten with the contents of the new template. With this flag, the data from the current environment file will be merged with the current environment template, applying any updates to the existing template variables and adding any new ones to the bottom of the template.
 
 **NOTE:** If other people work in the same repository, it is recommended to avoid this and use the default merge approach, where ony new variables from the `.env` file will be added to the bottom of the existing template. Otherwise, you may find that, since you and your teammates's may only use a subset of supported variables, you'll each end up creating and committing different templates.
 
@@ -100,7 +100,6 @@ Optionally, you can specify the `-o` (`--overwrite`) flag to force any existing 
 - [ ] Make src argument optional, defaulting to `.env`
 - [ ] Option to specify template file name (currently only supports hardcoded `template.env`)
 - [ ] Have an option to run both `format` and `template` in the same command (currently this has to be done as two separate commands, causing your env file to be parsed each time)
-- [ ] Support updating existing template variables using the default merge (non overwrite) approach
 - [ ] Publish as an npm package
 - [ ] VSCode extension to apply syntax-highlighting and  auto-complete for EvarDoc keywords, as well as format on save
 - [ ] Option to automatically add Environment Variables markdown table to  readme
