@@ -32,7 +32,7 @@ const action: EvarDocCommandAction<Options> = async (
 };
 
 /**
- * The metatdata assciated with the command.
+ * The metatdata associated with the command.
  */
 export const templateCommandMetadata: EvarDocCommandMetadata<Options> = {
   command: "template",

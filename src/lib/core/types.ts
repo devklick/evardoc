@@ -80,7 +80,7 @@ export type EvarDocBlock = {
    */
   description: string[] | null;
   /**
-   * The type of data that the envrionment variable represents
+   * The type of data that the environment variable represents
    */
   type: EvarType | null;
   /**
@@ -103,7 +103,7 @@ export type EvarDocBlock = {
 
 export type Evar = EvarDocBlock & {
   /**
-   * The name of the envrionemnt variable.
+   * The name of the environment variable.
    * i.e. the value before the `=`.
    */
   name: string;

@@ -2,7 +2,11 @@
   "name": "evardoc",
   "version": "0.0.1",
   "description": "Document your environment variables with EvarDoc",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node --inspect -r ts-node/register src/index.ts"

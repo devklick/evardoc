@@ -45,7 +45,7 @@ export type ParseError = {
    */
   severity: ParseErrorSeverity;
   /**
-   * A user-freindly message that explains what the error means
+   * A user-friendly message that explains what the error means
    */
   message: string;
 };
@@ -93,8 +93,8 @@ const errorType: Record<
 };
 
 /**
- * The result from processing a single environment bariable doc block, including
- * any errors that may have occured during the parsing process.
+ * The result from processing a single environment variable doc block, including
+ * any errors that may have occurred during the parsing process.
  */
 export type ParsedEvar = Evar & {
   errors: ParseError[];
@@ -156,7 +156,7 @@ export const parse = async (envFilePath: string): Promise<ParseResult> => {
 };
 
 /**
- * A raw environment variable parsed from an envrionment file.
+ * A raw environment variable parsed from an environment file.
  * This is used in the early stages of parsing
  */
 type RawEvar = {
@@ -280,7 +280,7 @@ type ParsedEvarDefinition = {
    */
   value: string | null;
   /**
-   * The errors that occured while parsing the variable, if any.
+   * The errors that occurred while parsing the variable, if any.
    */
   errors: ParseError[];
 };
@@ -289,7 +289,7 @@ type ParsedEvarDefinition = {
  * Parses an environment variable definition.
  *
  * Note that this parses the environment variable ony, and not any comments that are decorated on it.
- * @param definition The line from the environmet file containing the environment variable key and (potentially) value.
+ * @param definition The line from the environment file containing the environment variable key and (potentially) value.
  * @returns The parsed environment variable definition, including any errors that occurred during the process.
  */
 const parseDefinition = (definition: string): ParsedEvarDefinition => {
@@ -325,7 +325,7 @@ type ParsedEvarComment = {
   key: string | null;
   /**
    * The value of the comment (i.e. everything after the first `:`, if any).
-   * If the comment doesnt have a semi-colon, it's not an EvarDoc comment, so there will be no value listed here.
+   * If the comment doesn't have a semi-colon, it's not an EvarDoc comment, so there will be no value listed here.
    */
   value: string | string[] | null;
   /**

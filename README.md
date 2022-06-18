@@ -23,6 +23,7 @@ A CLI that builds a template of your environment variables file(s) (excluding th
 
 Each comment key is optional, and each can only be used once per envrionment variable.
 
+
 # Example Documented Environment File
 ```
 # description: some description about some int.
@@ -56,31 +57,39 @@ SOME_STRING=
 - This has been through the formatter, so the order of doc keys, the white space etc are all consistent. 
 - Multi-line comments are supported for `description` only
 
+# Installation
+To add EvarDoc to your project, install it as a dev dependency with npm
+```
+npm i -D evardoc
+```
+Once EvarDoc is installed, you can access from the `node_modules` folder. An example command would look like:
+```
+./node_modules/evardoc format .env
+```
+Alternatively, you could add npm scripts to execute EvarDoc, for example:
+```
+"scripts": {
+    "evardoc:format": "evardoc format .env",
+    "evardoc:template": "evardoc template .env"
+}
+```
+And execute the npm scripts
+```
+npm run evardoc:format
+npm run evardoc:template
+```
+
 
 # Formatting your environment file
-Currently the best way to do this is by checking out the repository and running the following
-```
-npm run dev format .env
-```
-Or, you can compile the typescript and execute the javascript directly
-```
-tsc && node src/index.js format .env
-```
-This executes the `format` command against the `.env` file.
+The `format` command allows you to format an environment variables file. Formatting will apply consistent white spaces across all your environment variables and EvarDoc comments, as well as maintaining a consistent order of EvarDoc comments. The order is as described in the first section of the readme.
 
 
 # Creating an environment file template
-Currently, the best way to do this is by checking out the repository and running the following:
-```
-npm run dev template .env
-```
-Or, you can compile the typescript and execute the javascript directly
-```
-tsc && node src/index.js template .env
-```
-This executes the `template` command against the `.env` file.
+The `template` command allows you create a formatted environment variable template file that excludes the variable values, so that the template can be committed to your repository and used by others working on the codebase.
 
-Optionally, you can specify the `-o` (`--overwrite`) flag to indicate that you want to completely overwrite any existing template file. 
+The template will be formatted using the `format` command and written to a file called `template.env`.
+
+Optionally, you can specify the `-o` (`--overwrite`) flag to force any existing `template.env` file to be overwritten with the contents of the new template.
 
 **NOTE:** If other people work in the same repository, it is recommended to avoid this and use the default merge approach, where ony new variables from the `.env` file will be added to the bottom of the existing template. Otherwise, you may find that, since you and your teammates's may only use a subset of supported variables, you'll each end up creating and committing different templates.
 
@@ -88,6 +97,7 @@ Optionally, you can specify the `-o` (`--overwrite`) flag to indicate that you w
 
 
 # Future Plans
+- [ ] Make src argument optional, defaulting to `.env`
 - [ ] Option to specify template file name (currently only supports hardcoded `template.env`)
 - [ ] Have an option to run both `format` and `template` in the same command (currently this has to be done as two separate commands, causing your env file to be parsed each time)
 - [ ] Support updating existing template variables using the default merge (non overwrite) approach

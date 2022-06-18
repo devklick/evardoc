@@ -13,7 +13,7 @@ import { EOL } from "os";
 const addComment = (lines: string[], key: string, value: unknown | null) => {
   if (value) {
     // In some cases the value is an array. We need to convert that to strings with line breaks,
-    // where each line (other than the first), is preceeded with a comment hash
+    // where each line (other than the first), is preceded with a comment hash
     const formattedValue = Array.isArray(value)
       ? value.join(`${EOL}# `)
       : value;
@@ -40,7 +40,7 @@ const addBlock = (
 };
 
 /**
- * Formats the pased environment variable data
+ * Formats the parsed environment variable data
  * @param evarVariables The parsed environment variables, including the comments that decorate them
  * @param excludeVariableValues Whether or not the variable values should be excluded from the formatted data.
  * @param templateEvarVariables The parsed variables from the existing template.
@@ -63,7 +63,7 @@ export const applyFormat = (
 
   // For each of the actual environment variables,
   // if we have existing template variables and the variable is not already in the template,
-  // or we dont have existing template variables, add the variable as a new block
+  // or we don't have existing template variables, add the variable as a new block
   evarVariables.forEach((evar) => {
     if (
       !templateEvarVariables ||
