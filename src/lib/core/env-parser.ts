@@ -144,8 +144,11 @@ const isNullOrWhiteSpace = (line: string) => !line || line.trim() === "";
  * Reads the environment file and returns the parsed contents
  * @param envFilePath The absolute path to the environment file to be parsed
  */
-export const parse = async (envFilePath: string): Promise<ParseResult> => {
-  const content = await fs.readFile(envFilePath, "utf-8");
+export const parse = async (
+  envFilePath: string
+): Promise<ParseResult | null> => {
+  const content = await tryReadFile(envFilePath);
+  if (!content) return null;
   const rawEvars = getRawEvars(content);
   const variables = rawEvars.map((rawEvar) => parseRawEvar(rawEvar));
   const success = variables.some(
@@ -153,6 +156,14 @@ export const parse = async (envFilePath: string): Promise<ParseResult> => {
   );
 
   return { success, variables };
+};
+
+const tryReadFile = async (path: string) => {
+  try {
+    return await fs.readFile(path, "utf-8");
+  } catch (error) {
+    return null;
+  }
 };
 
 /**

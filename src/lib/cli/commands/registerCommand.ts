@@ -4,12 +4,18 @@ import {
   EvarDocCommandMetadata,
   EvarDocCommandOption,
 } from "./types";
+const addRequirementParens = (value: string, required: boolean) => {
+  return required ? `<${value}>` : `[${value}]`;
+};
 
 const argName = (argument: EvarDocCommandArgument): string => {
   return argument.required ? `<${argument.name}>` : `[${argument.name}]`;
 };
 const optionFlags = (option: EvarDocCommandOption): string => {
-  return `-${option.shortName}, --${option.fullName}`;
+  const valueTemplate = option.boolean
+    ? ""
+    : addRequirementParens(option.shortName, option.required);
+  return `-${option.shortName}, --${option.fullName} ${valueTemplate}`;
 };
 
 const registerCommand = <Options>(
