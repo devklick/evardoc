@@ -6,6 +6,7 @@ export type EvarDocCommandOption = {
   description: string;
   default: string | boolean | string[];
   required: boolean;
+  boolean: boolean;
 };
 
 export type EvarDocCommandMetadata<Options = null> = {

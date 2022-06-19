@@ -54,6 +54,7 @@ export const templateCommandMetadata: EvarDocCommandMetadata<Options> = {
         Without this option, only new environment variable information will be written to the bottom of the template, if one already exists`,
       default: false,
       required: false,
+      boolean: true,
     },
     {
       shortName: "d",
@@ -61,6 +62,7 @@ export const templateCommandMetadata: EvarDocCommandMetadata<Options> = {
       description: "The file that he template should be saved to",
       default: "template.env",
       required: false,
+      boolean: false,
     },
   ],
   action,
