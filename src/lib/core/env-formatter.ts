@@ -57,9 +57,15 @@ export const applyFormat = (
   // If we variables from an existing template, they come first.
   // Any variables from the environment file get appended to the bottom of the content
   if (templateEvarVariables)
-    templateEvarVariables.forEach((evar) =>
-      addBlock(blocks, evar, excludeVariableValues)
-    );
+    templateEvarVariables.forEach((templateEvar) => {
+      // If the variable exists in both the existing template & the env file being formatted,
+      // we'll use the data from the env file being processed, as it may be updated.
+      const actualEvar = evarVariables.find(
+        (v) => v.name === templateEvar.name
+      );
+
+      addBlock(blocks, actualEvar ?? templateEvar, excludeVariableValues);
+    });
 
   // For each of the actual environment variables,
   // if we have existing template variables and the variable is not already in the template,

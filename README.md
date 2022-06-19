@@ -113,7 +113,6 @@ By default, if the destination template file already exists, it will not be over
 
 # Future Plans
 - [ ] Have an option to run both `format` and `template` in the same command (currently this has to be done as two separate commands, causing your env file to be parsed each time)
-- [ ] Support updating existing template variables using the default merge (non overwrite) approach
 - [ ] Publish as an npm package
 - [ ] VSCode extension to apply syntax-highlighting and  auto-complete for EvarDoc keywords, as well as format on save
 - [ ] Option to automatically add Environment Variables markdown table to  readme
