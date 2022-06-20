@@ -1,6 +1,6 @@
 {
   "name": "evardoc",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "Document your environment variables with EvarDoc",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
