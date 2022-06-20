@@ -62,11 +62,7 @@ To add EvarDoc to your project, install it as a dev dependency with npm
 ```
 npm i -D evardoc
 ```
-Once EvarDoc is installed, you can access from the `node_modules` folder. An example command would look like:
-```
-./node_modules/evardoc format
-```
-Alternatively, you could add npm scripts to execute EvarDoc, for example:
+Aadd npm scripts to execute EvarDoc, for example:
 ```
 "scripts": {
     "evardoc:format": "evardoc format",
@@ -86,7 +82,7 @@ The `format` command allows you to format an environment variables file. Formatt
 ## Specifying the file to be formatted
 By default, executing the `format` command will format the file named `.env`. Instead, if you want to format a different file, you can specifying the path to the file immediately after the `format` command. For example
 ```
-./node_modules/evardoc format test.env
+npm run evardoc:format test.env
 ``` 
 
 # Creating an environment file template
@@ -95,12 +91,12 @@ The `template` command allows you create a formatted environment variable templa
 ## Specifying the source of the template
 By default, executing the `template` command will pull variables from the file named `.env`. Instead, if you want to use a different file, you can specifying the path to the file immediately after the `template` command. For example
 ```
-./node_modules/evardoc template test.env
+npm run evardoc:template test.env
 ``` 
 ## Specifying the destination of the template
 By default, the template will be written to a file named `template.env`. If you want to write your template to different file, you can specify the `-d` (`--destination`) option. For example:
 ```
-./node_modules/evardoc template -d my-template.env
+npm run evardoc:template -d my-template.env
 ```
 
 ## Overwrite vs merge
@@ -113,6 +109,5 @@ By default, if the destination template file already exists, it will not be over
 
 # Future Plans
 - [ ] Have an option to run both `format` and `template` in the same command (currently this has to be done as two separate commands, causing your env file to be parsed each time)
-- [ ] Publish as an npm package
 - [ ] VSCode extension to apply syntax-highlighting and  auto-complete for EvarDoc keywords, as well as format on save
 - [ ] Option to automatically add Environment Variables markdown table to  readme
