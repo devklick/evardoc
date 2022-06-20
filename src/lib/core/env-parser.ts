@@ -345,21 +345,6 @@ type ParsedEvarComment = {
   errors: ParseError[];
 };
 
-type MyType = {
-  value: string;
-};
-const test = () => {
-  let optionalThing: MyType | null = null;
-
-  if (true) {
-    optionalThing = { value: "some value" };
-  }
-
-  if (true) {
-    optionalThing.value;
-  }
-};
-
 /**
  * Parses the comments that decorates an environment variable, regardless of whether or not they are EvarDoc comments.
  *
