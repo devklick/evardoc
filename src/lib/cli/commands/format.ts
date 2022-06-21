@@ -1,6 +1,7 @@
 import { applyFormat } from "../../core/env-formatter";
 import { parse } from "../../core/env-parser";
 import { write } from "../../core/env-writer";
+import { logParseResult } from "../../core/logger";
 import registerCommand from "./registerCommand";
 import {
   EvarDocCommand,
@@ -14,10 +15,9 @@ import {
  * @param envFilePath The path to the environment file
  */
 const action: EvarDocCommandAction = async (envFilePath) => {
-  console.log("Executing format command");
   const parsed = await parse(envFilePath);
-  if (!parsed?.success)
-    throw new Error("Parsing failed. Worry about this later");
+  logParseResult(envFilePath, parsed, true); // TODO: Replace hardcoded verbose with CLI option
+  if (!parsed.success) process.exit(1);
   const formatted = applyFormat(parsed.variables);
   await write(formatted, envFilePath);
 };

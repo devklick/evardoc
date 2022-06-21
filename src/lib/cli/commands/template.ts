@@ -1,5 +1,5 @@
 import { formatTemplate } from "../../core/env-formatter";
-import { parse } from "../../core/env-parser";
+import { parse, tryParse } from "../../core/env-parser";
 import { write } from "../../core/env-writer";
 import registerCommand from "./registerCommand";
 import {
@@ -25,9 +25,10 @@ const action: EvarDocCommandAction<Options> = async (
   { overwrite, destination }
 ) => {
   const parsed = await parse(envFilePath);
-  const existing = overwrite ? null : await parse("template.env");
-  if (!parsed?.success)
+  if (!parsed.success)
     throw new Error("Parsing failed. Worry about this later");
+
+  const existing = overwrite ? null : await tryParse("template.env");
   const formatted = formatTemplate(parsed.variables, existing?.variables);
   await write(formatted, destination);
 };
