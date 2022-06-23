@@ -141,14 +141,32 @@ const isComment = (line: string) => !!line.match(commentPrefixRegex);
 const isNullOrWhiteSpace = (line: string) => !line || line.trim() === "";
 
 /**
- * Reads the environment file and returns the parsed contents
+ * Reads the environment file and returns the parsed contents.
+ * If the file is not found, `null` is returned.
  * @param envFilePath The absolute path to the environment file to be parsed
  */
-export const parse = async (
+export const tryParse = async (
   envFilePath: string
 ): Promise<ParseResult | null> => {
   const content = await tryReadFile(envFilePath);
   if (!content) return null;
+  return processParsedContent(content);
+};
+
+/**
+ * Reads the environment file and returns the parsed contents
+ * @param envFilePath The absolute path to the environment file to be parsed
+ */
+export const parse = async (envFilePath: string): Promise<ParseResult> => {
+  const content = await fs.readFile(envFilePath, "utf-8");
+  return processParsedContent(content);
+};
+
+/**
+ * Processes the contents of the environment file
+ * @param content The data pull from the environment file
+ */
+const processParsedContent = (content: string): ParseResult => {
   const rawEvars = getRawEvars(content);
   const variables = rawEvars.map((rawEvar) => parseRawEvar(rawEvar));
   const success = variables.some(

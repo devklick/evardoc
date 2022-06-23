@@ -14,19 +14,20 @@
 - [Contents](#contents)
 - [What it is](#what-it-is)
 - [Supports the following documentation](#supports-the-following-documentation)
-- [Example Documented Environment File](#example-documented-environment-file)
+- [Example documented environment file](#example-documented-environment-file)
 - [Installation](#installation)
+- [Adding a pre-commit hook](#adding-a-pre-commit-hook)
 - [Formatting your environment file](#formatting-your-environment-file)
   - [Specifying the file to be formatted](#specifying-the-file-to-be-formatted)
 - [Creating an environment file template](#creating-an-environment-file-template)
   - [Specifying the source of the template](#specifying-the-source-of-the-template)
   - [Specifying the destination of the template](#specifying-the-destination-of-the-template)
   - [Overwrite vs merge](#overwrite-vs-merge)
-- [Future Plans](#future-plans)
+- [Future plans](#future-plans)
 
 # What it is
 
-A CLI that builds a template of your environment variables file(s) (excluding the variable values) so they can be documented and committed to source control to help other developers working on the codebase. Additionally, it can format your environment file(s) to apply a consistent, opinionated format.
+A CLI that builds a template of your environment variables file(s) (excluding the variable values) so they can be documented and committed to source control to help other developers working on the codebase. Supports various annotations in the form of hashtag comments, and additionally, it can format your environment file(s) to apply a consistent, opinionated format.
 
 # Supports the following documentation
 - `description` - A description that explains the what the environment variable is
@@ -38,8 +39,8 @@ A CLI that builds a template of your environment variables file(s) (excluding th
 Each comment key is optional, and each can only be used once per envrionment variable.
 
 
-# Example Documented Environment File
-```
+# Example documented environment file
+```shell
 # description: some description about some int.
 # Since this is a really long description, it's split into multiple lines.
 # This is totally OK and the line breaks will be preserved.
@@ -89,9 +90,26 @@ npm run evardoc:format
 npm run evardoc:template
 ```
 
+# Adding a pre-commit hook
+If you are planning on adopting EvarDoc, it's best to set up a pre-commit hook to run the commands on every commit. One approach to doing so is to use [husky](https://github.com/typicode/husky).
+```
+npm i -D husky
+npm set-script prepare 'husky install'
+npx husky add .husky/pre-commit 'npm run evardoc:format && evardoc:template && git add template.env'
+git add .husky/pre-commit
+```
+Now, whenever you commit any changes to your repository, your environment variables file will be formatted and a template will be created/updated and added to your commit.
+
+**NOTE:**
+The last part of the command, `git add template.env` assumes you do not specify a custom path to the destination of your template. If you decide to use a custom path (see [Specifying the destination of the template](#specifying-the-destination-of-the-template)), you should replace `template.env` with the path to your template.
 
 # Formatting your environment file
 The `format` command allows you to format an environment variables file. Formatting will apply consistent white spaces across all your environment variables and EvarDoc comments, as well as maintaining a consistent order of EvarDoc comments. The order is as described in the ["Supports the following documentation"](#supports-the-following-documentation) section of the readme.
+
+Example:
+```
+npm run evardoc:format
+```
 
 ## Specifying the file to be formatted
 By default, executing the `format` command will format the file named `.env`. Instead, if you want to format a different file, you can specifying the path to the file immediately after the `format` command. For example
@@ -101,6 +119,11 @@ npm run evardoc:format test.env
 
 # Creating an environment file template
 The `template` command allows you create a formatted environment variable template file that excludes the variable values, so that the template can be committed to your repository and used by others working on the codebase.
+
+Example:
+```
+npm run evardoc:template
+```
 
 ## Specifying the source of the template
 By default, executing the `template` command will pull variables from the file named `.env`. Instead, if you want to use a different file, you can specifying the path to the file immediately after the `template` command. For example
@@ -124,8 +147,7 @@ By default, if the destination template file already exists, it will not be over
 
 - The main reason for creating an environment file template is committing to your repository and sharing with other users, without worrying about sharing variable values. As such, you will likely need to add your `template.env` to your `.gitignore` rules.
 
-
-# Future Plans
+# Future plans
 - [ ] Have an option to run both `format` and `template` in the same command (currently this has to be done as two separate commands, causing your env file to be parsed each time)
 - [ ] VSCode extension to apply syntax-highlighting and  auto-complete for EvarDoc keywords, as well as format on save
 - [ ] Option to automatically add Environment Variables markdown table to readme
