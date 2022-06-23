@@ -9,14 +9,21 @@ import {
   EvarDocCommandMetadata,
 } from "./types";
 
+export type Options = {
+  verbose: boolean;
+};
+
 /**
  * The action to be used when this command is executed.
  * Parses the specified environment file, formats it, and saves the formatted content to the same environment file.
  * @param envFilePath The path to the environment file
  */
-const action: EvarDocCommandAction = async (envFilePath) => {
+const action: EvarDocCommandAction<Options> = async (
+  envFilePath,
+  { verbose }
+) => {
   const parsed = await parse(envFilePath);
-  logParseResult(envFilePath, parsed, true); // TODO: Replace hardcoded verbose with CLI option
+  logParseResult(envFilePath, parsed, verbose); // TODO: Replace hardcoded verbose with CLI option
   if (!parsed.success) process.exit(1);
   const formatted = applyFormat(parsed.variables);
   await write(formatted, envFilePath);
@@ -25,7 +32,7 @@ const action: EvarDocCommandAction = async (envFilePath) => {
 /**
  * The metatdata associated with the command.
  */
-export const formatCommandMetadata: EvarDocCommandMetadata = {
+export const formatCommandMetadata: EvarDocCommandMetadata<Options> = {
   command: "format",
   description: "format an environment file, applying opinionated formatting",
   argument: {
@@ -35,6 +42,16 @@ export const formatCommandMetadata: EvarDocCommandMetadata = {
     default: ".env",
   },
   action,
+  options: [
+    {
+      fullName: "verbose",
+      shortName: "v",
+      description: "Whether or not verbose logs should be written out",
+      default: false,
+      required: false,
+      boolean: true,
+    },
+  ],
 };
 
 /**
