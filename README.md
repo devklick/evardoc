@@ -40,7 +40,7 @@ Each comment key is optional, and each can only be used once per envrionment var
 
 
 # Example documented environment file
-```sh
+```shell
 # description: some description about some int.
 # Since this is a really long description, it's split into multiple lines.
 # This is totally OK and the line breaks will be preserved.
