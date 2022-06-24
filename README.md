@@ -78,7 +78,7 @@ To add EvarDoc to your project, install the [EvarDoc npm package](https://www.np
 npm i -D evardoc
 ```
 Add npm scripts to execute EvarDoc, for example:
-```
+```json
 "scripts": {
     "evardoc:format": "evardoc format",
     "evardoc:template": "evardoc template"
@@ -141,7 +141,7 @@ Note that since we're passing in an extra option via an npm script, we have to f
 ## Overwrite vs merge
 By default, if the destination template file already exists, it will not be overwritten. Instead, new variables that exist in your environment variables source file will be appended to the bottom of the existing template file. Additionally, any environment variables that exist in both the source environment file and destination template will be updated in the template. Optionally, you can specify the `-o` (`--overwrite`) flag to force any existing `template.env` file to be completely overwritten with the contents of the new template.
 
-**NOTEs:** 
+**NOTES:** 
 
 - If other people work in the same repository, it is recommended to avoid the `-o` (`--overwrite`) option. Otherwise, you may find that since you and your teammates's may only use a subset of supported variables, so you'll each end up creating and committing different templates.
 
@@ -149,6 +149,6 @@ By default, if the destination template file already exists, it will not be over
 
 # Future plans
 - [ ] Have an option to run both `format` and `template` in the same command (currently this has to be done as two separate commands, causing your env file to be parsed each time)
-- [ ] VSCode extension to apply syntax-highlighting and  auto-complete for EvarDoc keywords, as well as format on save
+- [ ] VSCode extension to apply syntax-highlighting and auto-complete for EvarDoc keywords, as well as format on save
 - [ ] Option to automatically add Environment Variables markdown table to readme
 - [ ] Implement custom arg parsing and remove dependency on Commander
