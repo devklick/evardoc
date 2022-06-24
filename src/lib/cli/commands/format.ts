@@ -18,7 +18,7 @@ export type Options = {
  * Parses the specified environment file, formats it, and saves the formatted content to the same environment file.
  * @param envFilePath The path to the environment file
  */
-const action: EvarDocCommandAction<Options> = async (
+export const action: EvarDocCommandAction<Options> = async (
   envFilePath,
   { verbose }
 ) => {
@@ -34,7 +34,7 @@ const action: EvarDocCommandAction<Options> = async (
  */
 export const formatCommandMetadata: EvarDocCommandMetadata<Options> = {
   command: "format",
-  description: "format an environment file, applying opinionated formatting",
+  description: "Format an environment file, applying opinionated formatting",
   argument: {
     name: "src",
     description: "The path to the environment file to be formatted",
