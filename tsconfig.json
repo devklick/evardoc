@@ -20,6 +20,7 @@
     "lib": ["es2017"],
     "rootDir": "src",
     "outDir": "dist",
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "noImplicitOverride": false
   }
 }

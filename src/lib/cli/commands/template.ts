@@ -2,7 +2,7 @@ import { formatTemplate } from "../../core/env-formatter";
 import { parse, tryParse } from "../../core/env-parser";
 import { write } from "../../core/env-writer";
 import { logParseResult } from "../../core/logger";
-import registerCommand from "./registerCommand";
+import registerCommand from "./register-command";
 import {
   EvarDocCommand,
   EvarDocCommandAction,

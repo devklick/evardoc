@@ -1,8 +1,9 @@
-import {
+import format, {
   action,
   formatCommandMetadata,
   Options,
 } from "../../../../src/lib/cli/commands/format";
+
 import {
   parse as actualParse,
   ParseResult,
@@ -10,17 +11,23 @@ import {
 import { logParseResult as actualLogParseResult } from "../../../../src/lib/core/logger";
 import { applyFormat as actualApplyFormat } from "../../../../src/lib/core/env-formatter";
 import { write as actualWrite } from "../../../../src/lib/core/env-writer";
+import actualRegisterCommand from "../../../../src/lib/cli/commands/register-command";
+import { program } from "commander";
 
+jest.mock("commander");
 jest.mock("../../../../src/lib/core/env-parser.ts");
 jest.mock("../../../../src/lib/core/logger.ts");
 jest.mock("../../../../src/lib/core/env-formatter.ts");
 jest.mock("../../../../src/lib/core/env-writer.ts");
+jest.mock("../../../../src/lib/cli/commands/register-command");
 
 const mockParse = jest.mocked(actualParse, true);
 const mockLogParseResult = jest.mocked(actualLogParseResult, true);
 const mockApplyFormat = jest.mocked(actualApplyFormat, true);
 const mockWrite = jest.mocked(actualWrite, true);
 const mockProcessExit = jest.spyOn(process, "exit").mockImplementation();
+const mockRegisterCommand = jest.mocked(actualRegisterCommand, true);
+const mockProgram = jest.mocked(program, true);
 
 describe("format command", () => {
   describe("action", () => {
@@ -155,6 +162,17 @@ describe("format command", () => {
           expect(formatCommandMetadata.options![0].boolean).toStrictEqual(true);
         });
       });
+    });
+  });
+
+  describe("format", () => {
+    it("Should call the registerCommand function to register the format command", () => {
+      format(mockProgram);
+      expect(mockRegisterCommand).toBeCalledTimes(1);
+      expect(mockRegisterCommand).toBeCalledWith(
+        mockProgram,
+        formatCommandMetadata
+      );
     });
   });
 });
