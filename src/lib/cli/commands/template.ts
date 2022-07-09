@@ -88,7 +88,5 @@ export const templateCommandMetadata: EvarDocCommandMetadata<Options> = {
  * Builds the command that is used to create an environment file template from an existing environment file.
  * @param program The commander program
  */
-const template: EvarDocCommand = (program) =>
+export const register: EvarDocCommand = (program) =>
   registerCommand(program, templateCommandMetadata);
-
-export default template;

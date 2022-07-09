@@ -1,4 +1,4 @@
-import format from "./format";
-import template from "./template";
+import * as format from "./format";
+import * as template from "./template";
 
 export default { format, template };

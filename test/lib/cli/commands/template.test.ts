@@ -1,7 +1,8 @@
-import template, {
+import {
   action,
   Options,
   templateCommandMetadata,
+  register,
 } from "../../../../src/lib/cli/commands/template";
 
 import {
@@ -282,9 +283,9 @@ describe("template command", () => {
     });
   });
 
-  describe("template", () => {
+  describe("register", () => {
     it("Should call the registerCommand function to register the template command", () => {
-      template(mockProgram);
+      register(mockProgram);
       expect(mockRegisterCommand).toBeCalledTimes(1);
       expect(mockRegisterCommand).toBeCalledWith(
         mockProgram,

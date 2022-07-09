@@ -1,7 +1,8 @@
-import format, {
+import {
   action,
   formatCommandMetadata,
   Options,
+  register,
 } from "../../../../src/lib/cli/commands/format";
 
 import {
@@ -165,9 +166,9 @@ describe("format command", () => {
     });
   });
 
-  describe("format", () => {
+  describe("register", () => {
     it("Should call the registerCommand function to register the format command", () => {
-      format(mockProgram);
+      register(mockProgram);
       expect(mockRegisterCommand).toBeCalledTimes(1);
       expect(mockRegisterCommand).toBeCalledWith(
         mockProgram,

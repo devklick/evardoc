@@ -58,7 +58,5 @@ export const formatCommandMetadata: EvarDocCommandMetadata<Options> = {
  * Builds the command that is used to format an environment file
  * @param program The commander program
  */
-const format: EvarDocCommand = (program): void =>
+export const register: EvarDocCommand = (program): void =>
   registerCommand(program, formatCommandMetadata);
-
-export default format;
