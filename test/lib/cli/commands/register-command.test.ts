@@ -54,7 +54,33 @@ describe("register-command", () => {
 
   it("Should add the metadata to the program", () => {
     registerCommand(mockProgram, mockMetaData);
+    expect(mockProgram.command).toBeCalledWith(mockMetaData.command);
+    expect(mockProgram.description).toBeCalledWith(mockMetaData.description);
+    expect(mockProgram.argument).toBeCalledWith(
+      argName(mockMetaData.argument),
+      mockMetaData.argument.description,
+      mockMetaData.argument.default
+    );
+    expect(mockProgram.action).toBeCalledWith(mockMetaData.action);
+
+    expect(mockProgram.option).toBeCalledTimes(
+      mockMetaData.options?.length ?? 0
+    );
+    mockMetaData.options?.forEach((option) =>
+      expect(mockProgram.option).toBeCalledWith(
+        optionFlags(option),
+        option.description,
+        option.default
+      )
+    );
   });
+
+  it("Should not attempt to add options if the metadata options are null", () => {
+    mockMetaData.options = undefined;
+    registerCommand(mockProgram, mockMetaData);
+    expect(mockProgram.option).not.toBeCalled();
+  });
+
   describe("addRequirementParens", () => {
     it("Should wrap the value in angle brackets when its required", () => {
       const value = "value";
