@@ -23,7 +23,7 @@ export const action: EvarDocCommandAction<Options> = async (
   { verbose }
 ) => {
   const parsed = await parse(envFilePath);
-  logParseResult(envFilePath, parsed, verbose); // TODO: Replace hardcoded verbose with CLI option
+  logParseResult(envFilePath, parsed, verbose);
   if (!parsed.success) process.exit(1);
   const formatted = applyFormat(parsed.variables);
   await write(formatted, envFilePath);
