@@ -8,7 +8,7 @@
     "evardoc": "dist/index.js"
   },
   "files": [
-    "dist/**/*"
+    "dist/src/**/*"
   ],
   "scripts": {
     "test": "jest",
