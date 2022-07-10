@@ -15,6 +15,7 @@ import { formatTemplate as actualFormatTemplate } from "../../../../src/lib/core
 import { write as actualWrite } from "../../../../src/lib/core/env-writer";
 import actualRegisterCommand from "../../../../src/lib/cli/commands/register-command";
 import { program } from "commander";
+import { parsedEvar1, parsedEvar2 } from "../../../test-data";
 
 jest.mock("commander");
 jest.mock("../../../../src/lib/core/env-parser.ts");
@@ -45,27 +46,11 @@ describe("template command", () => {
       options = { verbose: true, destination: "dest", overwrite: false };
       parseResult1 = {
         success: true,
-        variables: [
-          {
-            default: true,
-            description: ["test var"],
-            errors: [],
-            example: false,
-            name: "test",
-            requirement: "optional",
-            type: "boolean",
-            value: "false",
-          },
-        ],
+        variables: [parsedEvar1],
       };
       parseResult2 = {
         ...parseResult1,
-        variables: [
-          {
-            ...parseResult1.variables[0],
-            name: "test 2",
-          },
-        ],
+        variables: [parsedEvar2],
       };
       formattedContent = "dummy data";
       mockParse.mockResolvedValue(parseResult1);

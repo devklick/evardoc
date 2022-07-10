@@ -170,8 +170,8 @@ export const parse = async (envFilePath: string): Promise<ParseResult> => {
 export const processParsedContent = (content: string): ParseResult => {
   const rawEvars = getRawEvars(content);
   const variables = rawEvars.map((rawEvar) => parseRawEvar(rawEvar));
-  const success = variables.some(
-    (p) => !p.errors.find((e) => e.severity !== "warning")
+  const success = !variables.some((v) =>
+    v.errors.some((e) => e.severity === "fatal")
   );
 
   return { success, variables };
@@ -189,7 +189,7 @@ export const tryReadFile = async (path: string) => {
  * A raw environment variable parsed from an environment file.
  * This is used in the early stages of parsing
  */
-type RawEvar = {
+export type RawEvar = {
   /**
    * The line containing the variable key and value.
    * @example MY_VAR=123
@@ -207,7 +207,7 @@ type RawEvar = {
  * @param content The content of the environment file
  * @returns The semi-parsed, mostly-raw variables
  */
-const getRawEvars = (content: string): Array<RawEvar> => {
+export const getRawEvars = (content: string): Array<RawEvar> => {
   const rawEvars: Array<RawEvar> = [];
   const initCurrent = (): RawEvar => ({ comments: [], definition: "" });
 
@@ -231,7 +231,7 @@ const getRawEvars = (content: string): Array<RawEvar> => {
  * @param rawEvar The raw environment variable to be parsed
  * @returns The parsed environment variable, including any errors that occurred during the parsing process.
  */
-const parseRawEvar = (rawEvar: RawEvar): ParsedEvar => {
+export const parseRawEvar = (rawEvar: RawEvar): ParsedEvar => {
   const definition = parseDefinition(rawEvar.definition);
   const comments = parseComments(rawEvar.comments);
   return {

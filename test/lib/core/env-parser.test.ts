@@ -3,10 +3,18 @@ import {
   isNullOrWhiteSpace,
   parse,
   ParseResult,
+  processParsedContent,
+  RawEvar,
   tryParse,
 } from "../../../src/lib/core/env-parser";
 import * as fs from "fs/promises";
 import * as envParser from "../../../src/lib/core/env-parser";
+import {
+  parsedEvar1,
+  parsedEvar2,
+  parsedEvar3_WithWarnings,
+  parsedEvar4_WithFatalError,
+} from "../../test-data";
 
 jest.mock("fs/promises");
 
@@ -45,37 +53,31 @@ describe("envParser", () => {
   });
 
   describe("tryeParse", () => {
-    const processParsedContentSpy = jest
-      .spyOn(envParser, "processParsedContent")
-      .mockImplementation();
-
-    const tryReadFileSpy = jest
-      .spyOn(envParser, "tryReadFile")
-      .mockImplementation();
+    let processParsedContentSpy: jest.SpyInstance;
+    let tryReadFileSpy: jest.SpyInstance;
 
     const envFilePath = ".env";
     const mockFileContent = "Some content";
     const mockParsedContent: ParseResult = {
       success: true,
-      variables: [
-        {
-          name: "TEST_EVAR",
-          value: "TEST_VALUE",
-          type: "string",
-          requirement: "required",
-          default: "empty",
-          description: ["some info about the var"],
-          example: "my string",
-          errors: [],
-        },
-      ],
+      variables: [parsedEvar1, parsedEvar2],
     };
     beforeEach(() => {
+      processParsedContentSpy = jest
+        .spyOn(envParser, "processParsedContent")
+        .mockImplementation();
+      tryReadFileSpy = jest
+        .spyOn(envParser, "tryReadFile")
+        .mockImplementation();
+
       tryReadFileSpy.mockResolvedValue(mockFileContent);
       processParsedContentSpy.mockReturnValue(mockParsedContent);
     });
     afterEach(() => {
       jest.clearAllMocks();
+    });
+    afterAll(() => {
+      processParsedContentSpy.mockRestore();
     });
     it("Should process the file content when the file was successfully read", async () => {
       const result = await tryParse(envFilePath);
@@ -96,32 +98,26 @@ describe("envParser", () => {
   describe("parse", () => {
     const mockParsedContent: ParseResult = {
       success: true,
-      variables: [
-        {
-          name: "TEST_EVAR",
-          value: "TEST_VALUE",
-          type: "string",
-          requirement: "required",
-          default: "empty",
-          description: ["some info about the var"],
-          example: "my string",
-          errors: [],
-        },
-      ],
+      variables: [parsedEvar1, parsedEvar2],
     };
-    const processParsedContentSpy = jest
-      .spyOn(envParser, "processParsedContent")
-      .mockImplementation();
+    let processParsedContentSpy: jest.SpyInstance;
 
     const envFilePath = ".env";
     const mockFileContent = "file content";
 
     beforeEach(() => {
+      processParsedContentSpy = jest
+        .spyOn(envParser, "processParsedContent")
+        .mockImplementation();
+
       mockFs.readFile.mockResolvedValue(mockFileContent);
       processParsedContentSpy.mockReturnValue(mockParsedContent);
     });
     afterEach(() => {
       jest.clearAllMocks();
+    });
+    afterAll(() => {
+      processParsedContentSpy.mockRestore();
     });
 
     it("Should read the file contents", async () => {
@@ -134,6 +130,83 @@ describe("envParser", () => {
       expect(result).toBe(mockParsedContent);
       expect(processParsedContentSpy).toBeCalledTimes(1);
       expect(processParsedContentSpy).toBeCalledWith(mockFileContent);
+    });
+  });
+  describe("processParsedContent", () => {
+    let getRawEvarsSpy: jest.SpyInstance;
+    let parseRawEvarSpy: jest.SpyInstance;
+
+    const content = "some mock content";
+    let rawEvars: Array<RawEvar>;
+
+    beforeEach(() => {
+      getRawEvarsSpy = jest
+        .spyOn(envParser, "getRawEvars")
+        .mockImplementation();
+
+      parseRawEvarSpy = jest
+        .spyOn(envParser, "parseRawEvar")
+        .mockImplementation();
+
+      rawEvars = [
+        {
+          definition: "EXAMPLE=VARIABLE",
+          comments: [
+            "Some stuff: about variable",
+            "More stuff: about same variable",
+          ],
+        },
+        {
+          definition: "ANOTHER=VAR",
+          comments: ["Some comment: with info", "More info: about var"],
+        },
+      ];
+      getRawEvarsSpy.mockReturnValue(rawEvars);
+      parseRawEvarSpy
+        .mockReturnValueOnce(parsedEvar1)
+        .mockReturnValueOnce(parsedEvar2);
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("Should extract the raw environment variables from the content parameter", () => {
+      processParsedContent(content);
+      expect(getRawEvarsSpy).toBeCalledTimes(1);
+      expect(getRawEvarsSpy).toBeCalledWith(content);
+    });
+
+    it("Should parse ach of the raw environment variables", () => {
+      processParsedContent(content);
+      expect(parseRawEvarSpy).toBeCalledTimes(rawEvars.length);
+      rawEvars.forEach((raw) => expect(parseRawEvarSpy).toBeCalledWith(raw));
+    });
+
+    it("Should treat warnings as successful", () => {
+      parseRawEvarSpy.mockReset();
+      parseRawEvarSpy
+        .mockReturnValueOnce(parsedEvar3_WithWarnings)
+        .mockReturnValueOnce(parsedEvar1);
+      const result = processParsedContent(content);
+      expect(result.success).toBe(true);
+      expect(result.variables).toStrictEqual([
+        parsedEvar3_WithWarnings,
+        parsedEvar1,
+      ]);
+    });
+
+    it("Should treat fatal errors as unsuccessful", () => {
+      parseRawEvarSpy.mockReset();
+      parseRawEvarSpy
+        .mockReturnValueOnce(parsedEvar4_WithFatalError)
+        .mockReturnValueOnce(parsedEvar1);
+      const result = processParsedContent(content);
+      expect(result.success).toBe(false);
+      expect(result.variables).toStrictEqual([
+        parsedEvar4_WithFatalError,
+        parsedEvar1,
+      ]);
     });
   });
 });

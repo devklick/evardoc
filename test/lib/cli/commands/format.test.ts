@@ -14,6 +14,7 @@ import { applyFormat as actualApplyFormat } from "../../../../src/lib/core/env-f
 import { write as actualWrite } from "../../../../src/lib/core/env-writer";
 import actualRegisterCommand from "../../../../src/lib/cli/commands/register-command";
 import { program } from "commander";
+import { parsedEvar1 } from "test/test-data";
 
 jest.mock("commander");
 jest.mock("../../../../src/lib/core/env-parser.ts");
@@ -42,18 +43,7 @@ describe("format command", () => {
       options = { verbose: true };
       parseResult = {
         success: true,
-        variables: [
-          {
-            default: true,
-            description: ["test var"],
-            errors: [],
-            example: false,
-            name: "test",
-            requirement: "optional",
-            type: "boolean",
-            value: "false",
-          },
-        ],
+        variables: [parsedEvar1],
       };
       formattedContent = "dummy data";
       mockParse.mockResolvedValue(parseResult);
