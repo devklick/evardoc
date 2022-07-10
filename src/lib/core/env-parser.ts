@@ -20,7 +20,7 @@ import { EOL } from "os";
 /**
  * The code that identifies the error
  */
-type ParseErrorCode =
+export type ParseErrorCode =
   | "duplicate-doc-key"
   | "malformed-environment-variable"
   | "bad-evardoc-value"
@@ -30,7 +30,7 @@ type ParseErrorCode =
 /**
  * The severity of the error
  */
-type ParseErrorSeverity = "warning" | "fatal";
+export type ParseErrorSeverity = "warning" | "fatal";
 
 /**
  * An error that occurred while parsing an environment variable
@@ -53,7 +53,7 @@ export type ParseError = {
 /**
  * The types of error that are handled during parsing.
  */
-const errorType: Record<
+export const errorType: Record<
   | "dupKey"
   | "malformedEvar"
   | "nonEvarDocComment"
@@ -132,13 +132,14 @@ const commentPrefixRegex = new RegExp("^[ ]*[#][ ]*");
  * @param line The line to be checked
  * @returns True when the line appears to be a comment based on the `commentStartRegex`, otherwise false.
  */
-const isComment = (line: string) => !!line.match(commentPrefixRegex);
+export const isComment = (line: string) => !!line.match(commentPrefixRegex);
 /**
  * Checks if the given string appears to contain only white space
  * @param line The line to be checked
  * @returns True when the string contains only whit space, otherwise false.
  */
-const isNullOrWhiteSpace = (line: string) => !line || line.trim() === "";
+export const isNullOrWhiteSpace = (line: string | undefined | null) =>
+  !line || line.trim() === "";
 
 /**
  * Reads the environment file and returns the parsed contents.
@@ -166,7 +167,7 @@ export const parse = async (envFilePath: string): Promise<ParseResult> => {
  * Processes the contents of the environment file
  * @param content The data pull from the environment file
  */
-const processParsedContent = (content: string): ParseResult => {
+export const processParsedContent = (content: string): ParseResult => {
   const rawEvars = getRawEvars(content);
   const variables = rawEvars.map((rawEvar) => parseRawEvar(rawEvar));
   const success = variables.some(
@@ -176,7 +177,7 @@ const processParsedContent = (content: string): ParseResult => {
   return { success, variables };
 };
 
-const tryReadFile = async (path: string) => {
+export const tryReadFile = async (path: string) => {
   try {
     return await fs.readFile(path, "utf-8");
   } catch (error) {
