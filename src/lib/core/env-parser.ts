@@ -274,7 +274,9 @@ export const findRequirementComment = (
  * @param comments The comments to be checked.
  * @returns The corresponding comment, or null.
  */
-const findTypeComment = (comments: ParsedEvarComment[]): EvarType | null => {
+export const findTypeComment = (
+  comments: ParsedEvarComment[]
+): EvarType | null => {
   const comment = findComment(comments, "type");
   if (comment && isEvarType(comment)) return comment;
   return null;

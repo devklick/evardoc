@@ -1,5 +1,8 @@
 import {
+  findComment,
   findDescription,
+  findRequirementComment,
+  findTypeComment,
   getRawEvars,
   isComment,
   isNullOrWhiteSpace,
@@ -24,6 +27,7 @@ import {
 } from "../../test-data";
 import {
   EvarDocKey,
+  EvarDocKeys,
   EvarRequirement,
   EvarRequirements,
   EvarType,
@@ -399,6 +403,9 @@ describe("envParser", () => {
         .spyOn(envParser, "findComment")
         .mockImplementation();
     });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
     it("Should return null when the comments do not contain a description comment", () => {
       findCommentSpy.mockReturnValue(null);
       const result = findDescription(mockComments);
@@ -416,6 +423,78 @@ describe("envParser", () => {
       const result = findDescription(mockComments);
       expect(findCommentSpy).toBeCalledWith(mockComments, "description");
       expect(result).toStrictEqual([descriptionValue]);
+    });
+  });
+
+  describe("findRequirementComment", () => {
+    const mockComments: ParsedEvarComment[] = [];
+    let findCommentSpy: jest.SpyInstance;
+    beforeEach(() => {
+      findCommentSpy = jest
+        .spyOn(envParser, "findComment")
+        .mockImplementation();
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+    afterAll(() => {
+      findCommentSpy.mockRestore();
+    });
+    it("Should return the comment when it is a valid evardoc requirement comment", () => {
+      const requirementComment = EvarRequirements.optional;
+      findCommentSpy.mockReturnValue(requirementComment);
+      const result = findRequirementComment(mockComments);
+      expect(findCommentSpy).toBeCalledTimes(1);
+      expect(findCommentSpy).toBeCalledWith(mockComments, "requirement");
+      expect(result).toBe(requirementComment);
+    });
+
+    it("Should return null when the comment is not found in the collection", () => {
+      findCommentSpy.mockReturnValue(null);
+      const result = findRequirementComment(mockComments);
+      expect(result).toBeNull();
+    });
+  });
+
+  describe("findTypeComment", () => {
+    const mockComments: ParsedEvarComment[] = [];
+    let findCommentSpy: jest.SpyInstance;
+    beforeEach(() => {
+      findCommentSpy = jest
+        .spyOn(envParser, "findComment")
+        .mockImplementation();
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+    afterAll(() => {
+      findCommentSpy.mockRestore();
+    });
+    it("Should return the comment when it is a valid evardoc type comment", () => {
+      const typeComment = EvarTypes.boolean;
+      findCommentSpy.mockReturnValue(typeComment);
+      const result = findTypeComment(mockComments);
+      expect(findCommentSpy).toBeCalledTimes(1);
+      expect(findCommentSpy).toBeCalledWith(mockComments, "type");
+      expect(result).toBe(typeComment);
+    });
+
+    it("Should return null when the comment is not found in the collection", () => {
+      findCommentSpy.mockReturnValue(null);
+      const result = findTypeComment(mockComments);
+      expect(result).toBeNull();
+    });
+  });
+
+  describe("findComment", () => {
+    it("Should return null when the multiple comments exist with the same key", () => {
+      const comments: ParsedEvarComment[] = Array(2).fill({
+        key: EvarDocKeys.type,
+        value: "value",
+        errors: [],
+      });
+      const result = findComment(comments, "type");
+      expect(result).toBeNull();
     });
   });
 });
