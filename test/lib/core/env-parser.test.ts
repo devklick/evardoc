@@ -1,11 +1,18 @@
 import {
+  findDescription,
+  getRawEvars,
   isComment,
   isNullOrWhiteSpace,
   parse,
+  ParsedEvarComment,
+  ParsedEvarDefinition,
+  ParseError,
+  parseRawEvar,
   ParseResult,
   processParsedContent,
   RawEvar,
   tryParse,
+  tryReadFile,
 } from "../../../src/lib/core/env-parser";
 import * as fs from "fs/promises";
 import * as envParser from "../../../src/lib/core/env-parser";
@@ -15,6 +22,13 @@ import {
   parsedEvar3_WithWarnings,
   parsedEvar4_WithFatalError,
 } from "../../test-data";
+import {
+  EvarDocKey,
+  EvarRequirement,
+  EvarRequirements,
+  EvarType,
+  EvarTypes,
+} from "../../../src/lib/core/types";
 
 jest.mock("fs/promises");
 
@@ -35,7 +49,7 @@ describe("envParser", () => {
 
   describe("isNullOrWhiteSpace", () => {
     it.each([null, undefined, ""])(
-      "Should return true when the string is falsey ($value)",
+      "Should return true when the string is falsy ($value)",
       (value) => {
         expect(isNullOrWhiteSpace(value)).toBe(true);
       }
@@ -52,7 +66,7 @@ describe("envParser", () => {
     });
   });
 
-  describe("tryeParse", () => {
+  describe("tryParse", () => {
     let processParsedContentSpy: jest.SpyInstance;
     let tryReadFileSpy: jest.SpyInstance;
 
@@ -78,6 +92,7 @@ describe("envParser", () => {
     });
     afterAll(() => {
       processParsedContentSpy.mockRestore();
+      tryReadFileSpy.mockRestore();
     });
     it("Should process the file content when the file was successfully read", async () => {
       const result = await tryParse(envFilePath);
@@ -132,6 +147,7 @@ describe("envParser", () => {
       expect(processParsedContentSpy).toBeCalledWith(mockFileContent);
     });
   });
+
   describe("processParsedContent", () => {
     let getRawEvarsSpy: jest.SpyInstance;
     let parseRawEvarSpy: jest.SpyInstance;
@@ -171,6 +187,10 @@ describe("envParser", () => {
       jest.clearAllMocks();
     });
 
+    afterAll(() => {
+      getRawEvarsSpy.mockRestore();
+      parseRawEvarSpy.mockRestore();
+    });
     it("Should extract the raw environment variables from the content parameter", () => {
       processParsedContent(content);
       expect(getRawEvarsSpy).toBeCalledTimes(1);
@@ -207,6 +227,195 @@ describe("envParser", () => {
         parsedEvar4_WithFatalError,
         parsedEvar1,
       ]);
+    });
+  });
+
+  describe("tryReadFile", () => {
+    const path = ".env";
+    const fileContent = "mock content";
+    beforeEach(() => {
+      mockFs.readFile.mockResolvedValue(fileContent);
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+    it("Should return the file contents when able to successfully read the file", async () => {
+      const result = await tryReadFile(path);
+      expect(result).toBe(fileContent);
+      expect(mockFs.readFile).toBeCalledTimes(1);
+      expect(mockFs.readFile).toBeCalledWith(path, "utf-8");
+    });
+    it("Should return null when an error occurs while trying to read the file", async () => {
+      mockFs.readFile.mockRejectedValue(new Error());
+      const result = await tryReadFile(path);
+      expect(result).toBeNull();
+    });
+  });
+
+  describe("getRawEvars", () => {
+    it("Should ignore empty lines", () => {
+      const content = "VAR_1=VALUE_1\n         \nVAR_2=VALUE_2";
+      const result = getRawEvars(content);
+      expect(result).toHaveLength(2);
+    });
+    it("Should add all comment lines to the comments array", () => {
+      const comment1 = "#comment 1";
+      const comment2 = "  ##      comment 2";
+      const content = `${comment1}\n${comment2}\nVAR_1=VALUE_1`;
+      const result = getRawEvars(content);
+      expect(result).toHaveLength(1);
+      expect(result[0].comments).toHaveLength(2);
+      expect(result[0].comments[0]).toBe(comment1);
+      expect(result[0].comments[1]).toBe(comment2);
+    });
+
+    it("Should add non-empty, non-comment lines as a new  variable definition", () => {
+      const var1 = "VAR_1=VALUE_1";
+      const var2 = "VAR_2=VALUE_2";
+      const var3 = "VAR_3=VALUE_3";
+      const content = `${var1}\n${var2}\n${var3}`;
+      const result = getRawEvars(content);
+      expect(result).toHaveLength(3);
+      expect(result[0].definition).toBe(var1);
+      expect(result[1].definition).toBe(var2);
+      expect(result[2].definition).toBe(var3);
+    });
+  });
+
+  describe("parseRawEvar", () => {
+    let parseDefinitionSpy: jest.SpyInstance;
+    let parseCommentsSpy: jest.SpyInstance;
+
+    const mockRawEvar: RawEvar = {
+      comments: ["some", "comments"],
+      definition: "MY_VAR=VAR_VALUE",
+    };
+
+    const mockParsedDefinition: ParsedEvarDefinition = {
+      key: "MY_VAR",
+      value: "MY_VALUE",
+      errors: [],
+    };
+
+    const createParsedEvarComment = (
+      key: EvarDocKey,
+      value: EvarType | EvarRequirement | string
+    ): ParsedEvarComment => ({
+      key,
+      value,
+      errors: [],
+    });
+
+    const descriptionComment = createParsedEvarComment(
+      "description",
+      "some variable description"
+    );
+    const requirementComment = createParsedEvarComment(
+      "requirement",
+      EvarRequirements.required
+    );
+    const typeComment = createParsedEvarComment("type", EvarTypes.string);
+    const exampleComment = createParsedEvarComment("example", "example value");
+    const defaultComment = createParsedEvarComment("default", "default value");
+
+    const mockParsedComments: ParsedEvarComment[] = [
+      descriptionComment,
+      requirementComment,
+      typeComment,
+      exampleComment,
+      defaultComment,
+    ];
+
+    beforeEach(() => {
+      parseDefinitionSpy = jest
+        .spyOn(envParser, "parseDefinition")
+        .mockImplementation()
+        .mockReturnValue(mockParsedDefinition);
+
+      parseCommentsSpy = jest
+        .spyOn(envParser, "parseComments")
+        .mockImplementation()
+        .mockReturnValue(mockParsedComments);
+    });
+
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+
+    afterAll(() => {
+      parseDefinitionSpy.mockRestore();
+      parseCommentsSpy.mockRestore();
+    });
+
+    it("Should parse the evar definition", () => {
+      const result = parseRawEvar(mockRawEvar);
+      expect(result.name).toBe(mockParsedDefinition.key);
+      expect(result.value).toBe(mockParsedDefinition.value);
+    });
+
+    it("Should parse the evar definition", () => {
+      const result = parseRawEvar(mockRawEvar);
+      expect(result.description).toStrictEqual([descriptionComment.value]);
+      expect(result.example).toBe(exampleComment.value);
+      expect(result.requirement).toBe(requirementComment.value);
+      expect(result.type).toBe(typeComment.value);
+      expect(result.default).toBe(defaultComment.value);
+    });
+
+    it("Should combine description errors with comment errors", () => {
+      const definitionErrors: ParseError[] = [
+        {
+          code: "bad-evardoc-value",
+          message: "description error",
+          severity: "fatal",
+        },
+      ];
+      const commentErrors: ParseError[] = [
+        {
+          code: "empty-line",
+          message: "comment error",
+          severity: "warning",
+        },
+      ];
+
+      mockParsedDefinition.errors = definitionErrors;
+      mockParsedComments[0].errors = commentErrors;
+      parseDefinitionSpy.mockReturnValue(mockParsedDefinition);
+      parseCommentsSpy.mockReturnValue(mockParsedComments);
+      const result = parseRawEvar(mockRawEvar);
+      expect(result.errors).toStrictEqual([
+        ...definitionErrors,
+        ...commentErrors,
+      ]);
+    });
+  });
+
+  describe("findDescription", () => {
+    const descriptionValue = "mock description";
+    const mockComments: ParsedEvarComment[] = [];
+    let findCommentSpy: jest.SpyInstance;
+    beforeEach(() => {
+      findCommentSpy = jest
+        .spyOn(envParser, "findComment")
+        .mockImplementation();
+    });
+    it("Should return null when the comments do not contain a description comment", () => {
+      findCommentSpy.mockReturnValue(null);
+      const result = findDescription(mockComments);
+      expect(findCommentSpy).toBeCalledWith(mockComments, "description");
+      expect(result).toBeNull();
+    });
+    it("Should wrap the description in an array", () => {
+      findCommentSpy.mockReturnValue(descriptionValue);
+      const result = findDescription(mockComments);
+      expect(findCommentSpy).toBeCalledWith(mockComments, "description");
+      expect(result).toStrictEqual([descriptionValue]);
+    });
+    it("Should return the description as-is when its an array", () => {
+      findCommentSpy.mockReturnValue([descriptionValue]);
+      const result = findDescription(mockComments);
+      expect(findCommentSpy).toBeCalledWith(mockComments, "description");
+      expect(result).toStrictEqual([descriptionValue]);
     });
   });
 });

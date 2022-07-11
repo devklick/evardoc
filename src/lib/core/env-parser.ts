@@ -246,7 +246,9 @@ export const parseRawEvar = (rawEvar: RawEvar): ParsedEvar => {
   };
 };
 
-const findDescription = (comments: ParsedEvarComment[]): string[] | null => {
+export const findDescription = (
+  comments: ParsedEvarComment[]
+): string[] | null => {
   const description = findComment(comments, "description");
   if (!description) return null;
   return typeof description === "string" ? [description] : description;
@@ -258,7 +260,7 @@ const findDescription = (comments: ParsedEvarComment[]): string[] | null => {
  * @param comments The comments to be checked.
  * @returns The corresponding comment, or null.
  */
-const findRequirementComment = (
+export const findRequirementComment = (
   comments: ParsedEvarComment[]
 ): EvarRequirement | null => {
   const comment = findComment(comments, "requirement");
@@ -285,7 +287,7 @@ const findTypeComment = (comments: ParsedEvarComment[]): EvarType | null => {
  * @param keyType The type of EvarDoc comment
  * @returns The corresponding comment, or null
  */
-const findComment = (
+export const findComment = (
   comments: ParsedEvarComment[],
   keyType: EvarDocKey
 ): string | string[] | null => {
@@ -299,7 +301,7 @@ const findComment = (
  *
  * Note that this is the environment variable only, and not any comments that are decorated on it.
  */
-type ParsedEvarDefinition = {
+export type ParsedEvarDefinition = {
   /**
    * The environment variable name.
    * If the variable appears to be malformed (does not follow the key=value syntax) the full line will be stored here.
@@ -322,7 +324,7 @@ type ParsedEvarDefinition = {
  * @param definition The line from the environment file containing the environment variable key and (potentially) value.
  * @returns The parsed environment variable definition, including any errors that occurred during the process.
  */
-const parseDefinition = (definition: string): ParsedEvarDefinition => {
+export const parseDefinition = (definition: string): ParsedEvarDefinition => {
   const parsed: ParsedEvarDefinition = {
     errors: [],
     key: "",
@@ -347,7 +349,7 @@ const parseDefinition = (definition: string): ParsedEvarDefinition => {
  *
  * Note that this is the comment only, and not the environment variable that it's associated with.
  */
-type ParsedEvarComment = {
+export type ParsedEvarComment = {
   /**
    * The key typically represents the EvarDocKey; the comment type that's supported by EvarDoc.
    * If the comment does not appear to be an EvarDoc comment, the entire comment will be stored here.
@@ -371,7 +373,7 @@ type ParsedEvarComment = {
  * @param comments The comments that decorate the environment variable and are to be parsed.
  * @returns The parsed comments, including any errors that occurred during the parsing process.
  */
-const parseComments = (comments: string[]): ParsedEvarComment[] => {
+export const parseComments = (comments: string[]): ParsedEvarComment[] => {
   const parsedComments: ParsedEvarComment[] = [];
 
   // To support multi-lin descriptions, we need to keep track of the description comment
