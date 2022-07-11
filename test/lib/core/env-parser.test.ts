@@ -1,4 +1,5 @@
 import {
+  errorType,
   findComment,
   findDescription,
   findRequirementComment,
@@ -7,6 +8,8 @@ import {
   isComment,
   isNullOrWhiteSpace,
   parse,
+  parseComments,
+  parseDefinition,
   ParsedEvarComment,
   ParsedEvarDefinition,
   ParseError,
@@ -495,6 +498,95 @@ describe("envParser", () => {
       });
       const result = findComment(comments, "type");
       expect(result).toBeNull();
+    });
+  });
+
+  describe("parseDefinition", () => {
+    it("Should return an error result when the definition contains no equals sign, $definition", () => {
+      const definition = "not-evar";
+      const result = parseDefinition(definition);
+      expect(result.key).toBe(definition);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toBe(errorType.malformedEvar);
+    });
+
+    it("Should return the key from the left of the equals and value from the right", () => {
+      const key = "my";
+      const value = "evar";
+      const definition = `${key}=${value}`;
+      const result = parseDefinition(definition);
+      expect(result.key).toBe(key);
+      expect(result.value).toBe(value);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it("Should trim white space from the key and value", () => {
+      const key = "my";
+      const value = "evar";
+      const definition = `    ${key}    =    ${value}    `;
+      const result = parseDefinition(definition);
+      expect(result.key).toBe(key);
+      expect(result.value).toBe(value);
+      expect(result.errors).toHaveLength(0);
+    });
+    it("Should handle missing keys and values", () => {
+      const key = "";
+      const value = "";
+      const definition = `${key}=${value}`;
+      const result = parseDefinition(definition);
+      expect(result.key).toBe(key);
+      expect(result.value).toBe(value);
+      expect(result.errors).toHaveLength(0);
+    });
+  });
+
+  describe("parseComments", () => {
+    const descriptionLine1 = "some first line of description";
+    const descriptionLine2 = "followed by second line of description";
+    const type = "string";
+    const requirement = "optional";
+    const comments = [
+      `description: ${descriptionLine1}`,
+      descriptionLine2,
+      `type: ${type}`,
+      `requirement: ${requirement}`,
+    ];
+
+    it("Should parse each comment", () => {
+      const result = parseComments(comments);
+      expect(result).toHaveLength(comments.length);
+      expect(result[0].key).toBe(EvarDocKeys.description);
+      expect(result[0].value).toStrictEqual([
+        descriptionLine1,
+        descriptionLine2,
+      ]);
+      expect(result[0].errors).toHaveLength(0);
+
+      expect(result[1].key).toBeNull();
+      expect(result[1].value).toBe(descriptionLine2);
+      expect(result[1].errors).toHaveLength(1);
+      expect(result[1].errors[0]).toBe(errorType.nonEvarDocComment);
+
+      expect(result[2].key).toBe(EvarDocKeys.type);
+      expect(result[2].value).toBe(type);
+      expect(result[2].errors).toHaveLength(0);
+
+      expect(result[3].key).toBe(EvarDocKeys.requirement);
+      expect(result[3].value).toBe(requirement);
+      expect(result[3].errors).toHaveLength(0);
+    });
+
+    it("Should return an error when the comment is a duplicate EvarDoc comment", () => {
+      const comments = [
+        `${EvarDocKeys.default}: one`,
+        `${EvarDocKeys.default}: two`,
+      ];
+      const result = parseComments(comments);
+      expect(result).toHaveLength(2);
+      expect(result[0].errors).toHaveLength(0);
+
+      expect(result[1].errors).toHaveLength(1);
+      expect(result[1].errors[0]).toBe(errorType.dupKey);
     });
   });
 });

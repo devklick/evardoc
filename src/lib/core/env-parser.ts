@@ -334,14 +334,14 @@ export const parseDefinition = (definition: string): ParsedEvarDefinition => {
   };
 
   const split = definition.split("=");
-  if (!split.length) {
+  if (split.length < 2) {
     parsed.key = definition;
     parsed.errors.push(errorType.malformedEvar);
     return parsed;
   }
 
-  parsed.key = split[0]?.trim();
-  parsed.value = split[1]?.trim();
+  parsed.key = split[0].trim();
+  parsed.value = split[1].trim();
   return parsed;
 };
 
@@ -407,16 +407,13 @@ export const parseComments = (comments: string[]): ParsedEvarComment[] => {
  * @param comments The list of comments to be checked against
  * @returns True if the comment key already exists, otherwise false.
  */
-const isDuplicateEvarDocComment = (
+export const isDuplicateEvarDocComment = (
   comment: ParsedEvarComment,
   comments: ParsedEvarComment[]
 ): boolean =>
   !!comment.key &&
   isEvarDocKey(comment.key) &&
-  comments.some(
-    (c) =>
-      !c.errors.length && c.key?.toLowerCase() === comment.key?.toLowerCase()
-  );
+  comments.some((c) => !c.errors.length && c.key === comment.key);
 
 /**
  * Updates the description comment value by appending the parsed comment value
@@ -478,7 +475,7 @@ const appendToDescription = (
  * @param comment The comment to be parsed
  * @returns The parsed comment, including any errors that occurred during the parsing process.
  */
-const parseComment = (comment: string): ParsedEvarComment => {
+export const parseComment = (comment: string): ParsedEvarComment => {
   const parsed: ParsedEvarComment = {
     errors: [],
     key: null,
