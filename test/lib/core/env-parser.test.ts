@@ -1,4 +1,5 @@
 import {
+  appendToDescription,
   errorType,
   findComment,
   findDescription,
@@ -8,6 +9,7 @@ import {
   isComment,
   isNullOrWhiteSpace,
   parse,
+  parseComment,
   parseComments,
   parseDefinition,
   ParsedEvarComment,
@@ -587,6 +589,67 @@ describe("envParser", () => {
 
       expect(result[1].errors).toHaveLength(1);
       expect(result[1].errors[0]).toBe(errorType.dupKey);
+    });
+  });
+
+  describe("appendToDescription", () => {
+    it("Should join the comment by a space when its an array", () => {
+      const comment: ParsedEvarComment = {
+        value: ["second", "third"],
+        errors: [],
+        key: null,
+      };
+      const description: ParsedEvarComment = {
+        key: EvarDocKeys.description,
+        value: "first",
+        errors: [],
+      };
+      const result = appendToDescription(description, comment);
+      expect(result.value).toStrictEqual(["first", "second third"]);
+    });
+  });
+
+  describe("parseComment", () => {
+    it("should return an error when the comment key is not a valid evardoc key", () => {
+      const comment = `invalid:value`;
+      const result = parseComment(comment);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toBe(errorType.nonEvarDocComment);
+    });
+
+    it.each([EvarDocKeys.type, EvarDocKeys.requirement])(
+      "Should return an error when the comment is an evardoc option set with an invalid value, $key",
+      (key) => {
+        const comment = `${key}:invalid`;
+        const result = parseComment(comment);
+        expect(result.errors).toHaveLength(1);
+        expect(result.errors[0]).toBe(errorType.badEvarDocValue);
+      }
+    );
+    it("Should convert valid uppercase keys to lowercase", () => {
+      const comment = `${EvarDocKeys.description.toUpperCase()}:some info`;
+      const result = parseComment(comment);
+      expect(result.key).toBe(EvarDocKeys.description);
+    });
+
+    it.each([
+      [EvarDocKeys.requirement, EvarRequirements.optional.toUpperCase()],
+      [EvarDocKeys.type, EvarTypes.integer.toUpperCase()],
+    ])(
+      "Should convert valid uppercase option set values to lowercase, $key, $value",
+      (key, value) => {
+        const comment = `${key}:${value}`;
+        const result = parseComment(comment);
+        expect(result.key).toBe(key);
+        expect(result.value).toBe(value.toLowerCase());
+      }
+    );
+    it("Should not change case of non-option-set values", () => {
+      const value = "SHOUTING";
+      const comment = `${EvarDocKeys.description}:${value}`;
+      const result = parseComment(comment);
+      expect(result.key).toBe(EvarDocKeys.description);
+      expect(result.value).toBe(value);
     });
   });
 });

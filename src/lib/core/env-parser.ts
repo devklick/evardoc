@@ -456,7 +456,7 @@ const maybeAppendToDescription = (
  * @param comment The comment to be appended
  * @returns The updated description
  */
-const appendToDescription = (
+export const appendToDescription = (
   description: ParsedEvarComment,
   comment: ParsedEvarComment
 ): ParsedEvarComment => {
@@ -496,24 +496,32 @@ export const parseComment = (comment: string): ParsedEvarComment => {
     return parsed;
   }
 
-  parsed.key = split[0]?.trim();
-  parsed.value = split[1]?.trim();
-
-  const lowerKey = parsed.key.toLowerCase();
-  const lowerValue = parsed.value.toLowerCase();
+  const lowerKey = split[0].trim().toLowerCase();
+  const value = split[1].trim();
+  const lowerValue = value.toLowerCase();
 
   if (!isEvarDocKey(lowerKey)) {
     parsed.errors.push(errorType.nonEvarDocComment);
     return parsed;
+  } else if (lowerKey === "type") {
+    if (!isEvarType(lowerValue)) {
+      parsed.errors.push(errorType.badEvarDocValue);
+      return parsed;
+    }
+    parsed.value = lowerValue;
+  } else if (lowerKey === "requirement") {
+    if (!isEvarRequirement(lowerValue)) {
+      parsed.errors.push(errorType.badEvarDocValue);
+      return parsed;
+    }
+    parsed.value = lowerValue;
   }
-  if (lowerKey === "type" && !isEvarType(lowerValue)) {
-    parsed.errors.push(errorType.badEvarDocValue);
-    return parsed;
+  // Valid, non-option-set value, so dont change case
+  else {
+    parsed.value = value;
   }
-  if (lowerKey === "requirement" && !isEvarRequirement(lowerValue)) {
-    parsed.errors.push(errorType.badEvarDocValue);
-    return parsed;
-  }
+
+  parsed.key = lowerKey;
 
   return parsed;
 };
