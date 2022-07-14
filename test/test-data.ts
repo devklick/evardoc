@@ -54,3 +54,25 @@ export const parsedEvar4_WithFatalError: Readonly<ParsedEvar> = {
   type: "decimal",
   value: "2.34",
 };
+
+export const parsedEvar5_WithWarningsAndError: Readonly<ParsedEvar> = {
+  default: 9.87,
+  description: ["test var 5"],
+  errors: [
+    {
+      code: "empty-line",
+      message: "some other warning",
+      severity: "warning",
+    },
+    {
+      code: "bad-evardoc-value",
+      message: "some fatal error",
+      severity: "fatal",
+    },
+  ],
+  example: 6.66,
+  name: "test 5",
+  requirement: "optional",
+  type: "decimal",
+  value: "4.56",
+};

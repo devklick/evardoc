@@ -15,7 +15,7 @@ export const logParseResult = (
   }
 };
 
-const logParseSuccess = (
+export const logParseSuccess = (
   envFilePath: string,
   variables: ParsedEvar[],
   verbose: boolean
@@ -42,7 +42,7 @@ const logParseSuccess = (
   logParseWarnings(envFilePath, variables, verbose);
 };
 
-const logParseWarnings = (
+export const logParseWarnings = (
   envFilePath: string,
   variables: ParsedEvar[],
   verbose: boolean
@@ -68,7 +68,7 @@ const logParseWarnings = (
   console.warn(lines.join(EOL));
 };
 
-const logParseFailure = (
+export const logParseFailure = (
   envFilePath: string,
   variables: ParsedEvar[],
   verbose: boolean // TODO: May be used for extra logging in future
