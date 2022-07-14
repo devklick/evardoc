@@ -6,7 +6,7 @@ type EvarDocCliMetadata = {
   description: string;
 };
 
-const cliMetadata: EvarDocCliMetadata = {
+export const cliMetadata: EvarDocCliMetadata = {
   name: "EvarDoc",
   description: "Documentation of environment variables made easy",
 };
@@ -17,8 +17,8 @@ const cli = (program: Command, version: string): void => {
     .description(cliMetadata.description)
     .version(version);
 
-  commands.format(program);
-  commands.template(program);
+  commands.format.register(program);
+  commands.template.register(program);
 
   program.parse();
 };

@@ -20,7 +20,7 @@ import { EOL } from "os";
 /**
  * The code that identifies the error
  */
-type ParseErrorCode =
+export type ParseErrorCode =
   | "duplicate-doc-key"
   | "malformed-environment-variable"
   | "bad-evardoc-value"
@@ -30,7 +30,7 @@ type ParseErrorCode =
 /**
  * The severity of the error
  */
-type ParseErrorSeverity = "warning" | "fatal";
+export type ParseErrorSeverity = "warning" | "fatal";
 
 /**
  * An error that occurred while parsing an environment variable
@@ -53,7 +53,7 @@ export type ParseError = {
 /**
  * The types of error that are handled during parsing.
  */
-const errorType: Record<
+export const errorType: Record<
   | "dupKey"
   | "malformedEvar"
   | "nonEvarDocComment"
@@ -132,13 +132,14 @@ const commentPrefixRegex = new RegExp("^[ ]*[#][ ]*");
  * @param line The line to be checked
  * @returns True when the line appears to be a comment based on the `commentStartRegex`, otherwise false.
  */
-const isComment = (line: string) => !!line.match(commentPrefixRegex);
+export const isComment = (line: string) => !!line.match(commentPrefixRegex);
 /**
  * Checks if the given string appears to contain only white space
  * @param line The line to be checked
  * @returns True when the string contains only whit space, otherwise false.
  */
-const isNullOrWhiteSpace = (line: string) => !line || line.trim() === "";
+export const isNullOrWhiteSpace = (line: string | undefined | null) =>
+  !line || line.trim() === "";
 
 /**
  * Reads the environment file and returns the parsed contents.
@@ -166,17 +167,17 @@ export const parse = async (envFilePath: string): Promise<ParseResult> => {
  * Processes the contents of the environment file
  * @param content The data pull from the environment file
  */
-const processParsedContent = (content: string): ParseResult => {
+export const processParsedContent = (content: string): ParseResult => {
   const rawEvars = getRawEvars(content);
   const variables = rawEvars.map((rawEvar) => parseRawEvar(rawEvar));
-  const success = variables.some(
-    (p) => !p.errors.find((e) => e.severity !== "warning")
+  const success = !variables.some((v) =>
+    v.errors.some((e) => e.severity === "fatal")
   );
 
   return { success, variables };
 };
 
-const tryReadFile = async (path: string) => {
+export const tryReadFile = async (path: string) => {
   try {
     return await fs.readFile(path, "utf-8");
   } catch (error) {
@@ -188,7 +189,7 @@ const tryReadFile = async (path: string) => {
  * A raw environment variable parsed from an environment file.
  * This is used in the early stages of parsing
  */
-type RawEvar = {
+export type RawEvar = {
   /**
    * The line containing the variable key and value.
    * @example MY_VAR=123
@@ -206,7 +207,7 @@ type RawEvar = {
  * @param content The content of the environment file
  * @returns The semi-parsed, mostly-raw variables
  */
-const getRawEvars = (content: string): Array<RawEvar> => {
+export const getRawEvars = (content: string): Array<RawEvar> => {
   const rawEvars: Array<RawEvar> = [];
   const initCurrent = (): RawEvar => ({ comments: [], definition: "" });
 
@@ -230,7 +231,7 @@ const getRawEvars = (content: string): Array<RawEvar> => {
  * @param rawEvar The raw environment variable to be parsed
  * @returns The parsed environment variable, including any errors that occurred during the parsing process.
  */
-const parseRawEvar = (rawEvar: RawEvar): ParsedEvar => {
+export const parseRawEvar = (rawEvar: RawEvar): ParsedEvar => {
   const definition = parseDefinition(rawEvar.definition);
   const comments = parseComments(rawEvar.comments);
   return {
@@ -245,7 +246,9 @@ const parseRawEvar = (rawEvar: RawEvar): ParsedEvar => {
   };
 };
 
-const findDescription = (comments: ParsedEvarComment[]): string[] | null => {
+export const findDescription = (
+  comments: ParsedEvarComment[]
+): string[] | null => {
   const description = findComment(comments, "description");
   if (!description) return null;
   return typeof description === "string" ? [description] : description;
@@ -257,7 +260,7 @@ const findDescription = (comments: ParsedEvarComment[]): string[] | null => {
  * @param comments The comments to be checked.
  * @returns The corresponding comment, or null.
  */
-const findRequirementComment = (
+export const findRequirementComment = (
   comments: ParsedEvarComment[]
 ): EvarRequirement | null => {
   const comment = findComment(comments, "requirement");
@@ -271,7 +274,9 @@ const findRequirementComment = (
  * @param comments The comments to be checked.
  * @returns The corresponding comment, or null.
  */
-const findTypeComment = (comments: ParsedEvarComment[]): EvarType | null => {
+export const findTypeComment = (
+  comments: ParsedEvarComment[]
+): EvarType | null => {
   const comment = findComment(comments, "type");
   if (comment && isEvarType(comment)) return comment;
   return null;
@@ -284,7 +289,7 @@ const findTypeComment = (comments: ParsedEvarComment[]): EvarType | null => {
  * @param keyType The type of EvarDoc comment
  * @returns The corresponding comment, or null
  */
-const findComment = (
+export const findComment = (
   comments: ParsedEvarComment[],
   keyType: EvarDocKey
 ): string | string[] | null => {
@@ -298,7 +303,7 @@ const findComment = (
  *
  * Note that this is the environment variable only, and not any comments that are decorated on it.
  */
-type ParsedEvarDefinition = {
+export type ParsedEvarDefinition = {
   /**
    * The environment variable name.
    * If the variable appears to be malformed (does not follow the key=value syntax) the full line will be stored here.
@@ -321,7 +326,7 @@ type ParsedEvarDefinition = {
  * @param definition The line from the environment file containing the environment variable key and (potentially) value.
  * @returns The parsed environment variable definition, including any errors that occurred during the process.
  */
-const parseDefinition = (definition: string): ParsedEvarDefinition => {
+export const parseDefinition = (definition: string): ParsedEvarDefinition => {
   const parsed: ParsedEvarDefinition = {
     errors: [],
     key: "",
@@ -329,14 +334,14 @@ const parseDefinition = (definition: string): ParsedEvarDefinition => {
   };
 
   const split = definition.split("=");
-  if (!split.length) {
+  if (split.length < 2) {
     parsed.key = definition;
     parsed.errors.push(errorType.malformedEvar);
     return parsed;
   }
 
-  parsed.key = split[0]?.trim();
-  parsed.value = split[1]?.trim();
+  parsed.key = split[0].trim();
+  parsed.value = split[1].trim();
   return parsed;
 };
 
@@ -346,7 +351,7 @@ const parseDefinition = (definition: string): ParsedEvarDefinition => {
  *
  * Note that this is the comment only, and not the environment variable that it's associated with.
  */
-type ParsedEvarComment = {
+export type ParsedEvarComment = {
   /**
    * The key typically represents the EvarDocKey; the comment type that's supported by EvarDoc.
    * If the comment does not appear to be an EvarDoc comment, the entire comment will be stored here.
@@ -370,7 +375,7 @@ type ParsedEvarComment = {
  * @param comments The comments that decorate the environment variable and are to be parsed.
  * @returns The parsed comments, including any errors that occurred during the parsing process.
  */
-const parseComments = (comments: string[]): ParsedEvarComment[] => {
+export const parseComments = (comments: string[]): ParsedEvarComment[] => {
   const parsedComments: ParsedEvarComment[] = [];
 
   // To support multi-lin descriptions, we need to keep track of the description comment
@@ -402,16 +407,13 @@ const parseComments = (comments: string[]): ParsedEvarComment[] => {
  * @param comments The list of comments to be checked against
  * @returns True if the comment key already exists, otherwise false.
  */
-const isDuplicateEvarDocComment = (
+export const isDuplicateEvarDocComment = (
   comment: ParsedEvarComment,
   comments: ParsedEvarComment[]
 ): boolean =>
   !!comment.key &&
   isEvarDocKey(comment.key) &&
-  comments.some(
-    (c) =>
-      !c.errors.length && c.key?.toLowerCase() === comment.key?.toLowerCase()
-  );
+  comments.some((c) => !c.errors.length && c.key === comment.key);
 
 /**
  * Updates the description comment value by appending the parsed comment value
@@ -454,7 +456,7 @@ const maybeAppendToDescription = (
  * @param comment The comment to be appended
  * @returns The updated description
  */
-const appendToDescription = (
+export const appendToDescription = (
   description: ParsedEvarComment,
   comment: ParsedEvarComment
 ): ParsedEvarComment => {
@@ -473,7 +475,7 @@ const appendToDescription = (
  * @param comment The comment to be parsed
  * @returns The parsed comment, including any errors that occurred during the parsing process.
  */
-const parseComment = (comment: string): ParsedEvarComment => {
+export const parseComment = (comment: string): ParsedEvarComment => {
   const parsed: ParsedEvarComment = {
     errors: [],
     key: null,
@@ -494,24 +496,32 @@ const parseComment = (comment: string): ParsedEvarComment => {
     return parsed;
   }
 
-  parsed.key = split[0]?.trim();
-  parsed.value = split[1]?.trim();
-
-  const lowerKey = parsed.key.toLowerCase();
-  const lowerValue = parsed.value.toLowerCase();
+  const lowerKey = split[0].trim().toLowerCase();
+  const value = split[1].trim();
+  const lowerValue = value.toLowerCase();
 
   if (!isEvarDocKey(lowerKey)) {
     parsed.errors.push(errorType.nonEvarDocComment);
     return parsed;
+  } else if (lowerKey === "type") {
+    if (!isEvarType(lowerValue)) {
+      parsed.errors.push(errorType.badEvarDocValue);
+      return parsed;
+    }
+    parsed.value = lowerValue;
+  } else if (lowerKey === "requirement") {
+    if (!isEvarRequirement(lowerValue)) {
+      parsed.errors.push(errorType.badEvarDocValue);
+      return parsed;
+    }
+    parsed.value = lowerValue;
   }
-  if (lowerKey === "type" && !isEvarType(lowerValue)) {
-    parsed.errors.push(errorType.badEvarDocValue);
-    return parsed;
+  // Valid, non-option-set value, so dont change case
+  else {
+    parsed.value = value;
   }
-  if (lowerKey === "requirement" && !isEvarRequirement(lowerValue)) {
-    parsed.errors.push(errorType.badEvarDocValue);
-    return parsed;
-  }
+
+  parsed.key = lowerKey;
 
   return parsed;
 };

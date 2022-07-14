@@ -2,7 +2,7 @@ import { formatTemplate } from "../../core/env-formatter";
 import { parse, tryParse } from "../../core/env-parser";
 import { write } from "../../core/env-writer";
 import { logParseResult } from "../../core/logger";
-import registerCommand from "./registerCommand";
+import registerCommand from "./register-command";
 import {
   EvarDocCommand,
   EvarDocCommandAction,
@@ -22,7 +22,7 @@ export type Options = {
  * or appended to with any new variables from the actual environment file.
  * @param envFilePath The path to the environment file
  */
-const action: EvarDocCommandAction<Options> = async (
+export const action: EvarDocCommandAction<Options> = async (
   envFilePath,
   { overwrite, destination, verbose }
 ) => {
@@ -43,8 +43,9 @@ const action: EvarDocCommandAction<Options> = async (
  */
 export const templateCommandMetadata: EvarDocCommandMetadata<Options> = {
   command: "template",
-  description: `Create a new environment file template from an existing environment file. 
-      Takes the EvarDoc comments and environment variable names (not values) from the environment file, formats them, and writes them to a template file.`,
+  description:
+    "Create a new environment file template from an existing environment file. " +
+    "Takes the EvarDoc comments and environment variable names (not values) from the environment file, formats them, and writes them to a template file.",
   argument: {
     name: "src",
     description:
@@ -56,8 +57,9 @@ export const templateCommandMetadata: EvarDocCommandMetadata<Options> = {
     {
       fullName: "overwrite",
       shortName: "o",
-      description: `Whether or not the existing template (if one exists), should be overwritten with the template content based on the environment file
-        Without this option, only new environment variable information will be written to the bottom of the template, if one already exists`,
+      description:
+        "Whether or not the existing template (if one exists), should be overwritten with the template content based on the environment file. " +
+        "Without this option, only new environment variable information will be written to the bottom of the template, if one already exists",
       default: false,
       required: false,
       boolean: true,
@@ -86,7 +88,5 @@ export const templateCommandMetadata: EvarDocCommandMetadata<Options> = {
  * Builds the command that is used to create an environment file template from an existing environment file.
  * @param program The commander program
  */
-const template: EvarDocCommand = (program) =>
+export const register: EvarDocCommand = (program) =>
   registerCommand(program, templateCommandMetadata);
-
-export default template;

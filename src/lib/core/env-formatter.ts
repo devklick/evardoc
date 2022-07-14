@@ -10,7 +10,11 @@ import { EOL } from "os";
   ========================================================================================================
 */
 
-const addComment = (lines: string[], key: string, value: unknown | null) => {
+export const addEvarDocComment = (
+  lines: string[],
+  key: string,
+  value: unknown | null
+): void => {
   if (value) {
     // In some cases the value is an array. We need to convert that to strings with line breaks,
     // where each line (other than the first), is preceded with a comment hash
@@ -20,61 +24,59 @@ const addComment = (lines: string[], key: string, value: unknown | null) => {
     lines.push(`# ${key}: ${formattedValue}`);
   }
 };
-const addEvar = (lines: string[], key: string, value: string | null) => {
+export const addEvar = (lines: string[], key: string, value: string | null) => {
   lines.push(`${key}=${value ?? ""}`);
 };
-const addBlock = (
+export const addBlock = (
   blocks: string[],
   evar: ParsedEvar,
   excludeVariableValues: boolean
 ) => {
   if (evar.errors.some((e) => e.severity !== "warning")) return;
   const lines: string[] = [];
-  addComment(lines, EvarDocKeys.description, evar.description);
-  addComment(lines, EvarDocKeys.type, evar.type);
-  addComment(lines, EvarDocKeys.requirement, evar.requirement);
-  addComment(lines, EvarDocKeys.default, evar.default);
-  addComment(lines, EvarDocKeys.example, evar.example);
+  addEvarDocComment(lines, EvarDocKeys.description, evar.description);
+  addEvarDocComment(lines, EvarDocKeys.type, evar.type);
+  addEvarDocComment(lines, EvarDocKeys.requirement, evar.requirement);
+  addEvarDocComment(lines, EvarDocKeys.default, evar.default);
+  addEvarDocComment(lines, EvarDocKeys.example, evar.example);
   addEvar(lines, evar.name, excludeVariableValues ? null : evar.value);
   blocks.push(lines.join(EOL));
 };
 
 /**
  * Formats the parsed environment variable data
- * @param evarVariables The parsed environment variables, including the comments that decorate them
+ * @param evars The parsed environment variables, including the comments that decorate them
  * @param excludeVariableValues Whether or not the variable values should be excluded from the formatted data.
- * @param templateEvarVariables The parsed variables from the existing template.
+ * @param existingTemplateEvars The parsed variables from the existing template.
  * This is intended to be specified when merging the environment files from the env file with the ones on the existing template
  * @returns The formatted environment variable, as a string, ready to be dumped to a file
  */
 export const applyFormat = (
-  evarVariables: ParsedEvar[],
+  evars: ParsedEvar[],
   excludeVariableValues: boolean = false,
-  templateEvarVariables: ParsedEvar[] | null = null
+  existingTemplateEvars: ParsedEvar[] | null = null
 ): string => {
   const blocks: string[] = [];
 
-  // If we variables from an existing template, they come first.
+  // If we have variables from an existing template, they come first.
   // Any variables from the environment file get appended to the bottom of the content
-  if (templateEvarVariables)
-    templateEvarVariables.forEach((templateEvar) => {
+  if (existingTemplateEvars)
+    existingTemplateEvars.forEach((templateEvar) => {
       // If the variable exists in both the existing template & the env file being formatted,
       // we'll use the data from the env file being processed, as it may be updated.
-      const actualEvar = evarVariables.find(
-        (v) => v.name === templateEvar.name
-      );
+      const actualEvar = evars.find((v) => v.name === templateEvar.name);
 
       addBlock(blocks, actualEvar ?? templateEvar, excludeVariableValues);
     });
 
   // For each of the actual environment variables,
-  // if we have existing template variables and the variable is not already in the template,
+  // if we have existing template variables that does not include the current variable,
   // or we don't have existing template variables, add the variable as a new block
-  evarVariables.forEach((evar) => {
+  evars.forEach((evar) => {
     if (
-      !templateEvarVariables ||
-      (templateEvarVariables &&
-        !templateEvarVariables.some((e) => e.name === evar.name))
+      !existingTemplateEvars ||
+      (existingTemplateEvars &&
+        !existingTemplateEvars.some((e) => e.name === evar.name))
     ) {
       addBlock(blocks, evar, excludeVariableValues);
     }

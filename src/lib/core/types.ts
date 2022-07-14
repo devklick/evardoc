@@ -58,7 +58,7 @@ export const isEvarType = (value: unknown): value is EvarType =>
 /**
  * The level of requirement for the environment variable
  */
-const EvarRequirements = {
+export const EvarRequirements = {
   required: "required",
   optional: "optional",
 } as const;
