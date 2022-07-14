@@ -24,7 +24,7 @@ export const logParseSuccess = (
   const lines: string[] = [`Successfully parsed ${envFilePath}`];
   const maybeAddLine = (indents: number, key: string, value: unknown) => {
     if (value) {
-      const indentsString = indents ? tab.repeat(indents) : "";
+      const indentsString = tab.repeat(indents);
       const valueString = Array.isArray(value) ? value.join(EOL) : value;
       lines.push(`${indentsString}${key}: ${valueString}`);
     }
@@ -54,7 +54,7 @@ export const logParseWarnings = (
 
   const lines: string[] = [`Encountered warnings while parsing ${envFilePath}`];
   const addWarning = (indents: number, code: string, message: string) => {
-    const indentsString = indents ? tab.repeat(indents) : "";
+    const indentsString = tab.repeat(indents);
     lines.push(`${indentsString}${message} (${code})`);
   };
   varsWithWarnings.forEach((variable) => {
@@ -83,7 +83,7 @@ export const logParseFailure = (
   const lines: string[] = [`Failed to parse ${envFilePath}`];
 
   const addWarning = (indents: number, code: string, message: string) => {
-    const indentsString = indents ? tab.repeat(indents) : "";
+    const indentsString = tab.repeat(indents);
     lines.push(`${indentsString}${message} (${code})`);
   };
   varsWithErrors.forEach((variable) => {
