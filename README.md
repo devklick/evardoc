@@ -10,7 +10,14 @@
 <br/>
 <br/>
 
+# Test coverage
+![Statements](https://img.shields.io/badge/statements-100%25-brightgreen.svg?style=flat)
+![Branches](https://img.shields.io/badge/branches-100%25-brightgreen.svg?style=flat)
+![Functions](https://img.shields.io/badge/functions-100%25-brightgreen.svg?style=flat)
+![Lines](https://img.shields.io/badge/lines-100%25-brightgreen.svg?style=flat)
+
 # Contents
+- [Test coverage](#test-coverage)
 - [Contents](#contents)
 - [What it is](#what-it-is)
 - [Supports the following documentation](#supports-the-following-documentation)
@@ -95,7 +102,7 @@ If you are planning on adopting EvarDoc, it's best to set up a pre-commit hook t
 ```
 npm i -D husky
 npm set-script prepare 'husky install'
-npx husky add .husky/pre-commit 'npm run evardoc:format && evardoc:template && git add template.env'
+npx husky add .husky/pre-commit 'npm run evardoc:format && npm run evardoc:template && git add template.env'
 git add .husky/pre-commit
 ```
 Now, whenever you commit any changes to your repository, your environment variables file will be formatted and a template will be created/updated and added to your commit.
