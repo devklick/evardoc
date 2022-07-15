@@ -1,6 +1,6 @@
 {
   "name": "evardoc",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Document your environment variables with EvarDoc",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,8 @@
   "scripts": {
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "dev": "node --inspect -r ts-node/register src/index.ts"
+    "dev": "node --inspect -r ts-node/register src/index.ts",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
