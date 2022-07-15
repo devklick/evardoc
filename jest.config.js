@@ -6,6 +6,10 @@ module.exports = {
   collectCoverage: true,
   coverageDirectory: 'coverage',
   testPathIgnorePatterns: ['/node_modules/'],
+  coverageReporters: [
+    'text',
+    'json-summary'
+  ],
   coverageThreshold: {
     global: {
       branches: 100,
