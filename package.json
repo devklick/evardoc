@@ -13,7 +13,8 @@
   "scripts": {
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "dev": "node --inspect -r ts-node/register src/index.ts"
+    "dev": "node --inspect -r ts-node/register src/index.ts",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
