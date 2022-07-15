@@ -6,8 +6,12 @@ module.exports = {
   collectCoverage: true,
   coverageDirectory: 'coverage',
   testPathIgnorePatterns: ['/node_modules/'],
-  // transform: {
-  //   "^.+\\.(js|ts|tsx)$": "ts-jest"
-  // },
-  //collectCoverageFrom: ['./src/**/*.ts', "!src/**.*.d.ts"]
+  coverageThreshold: {
+    global: {
+      branches: 100,
+      functions: 100,
+      lines: 100,
+      statements: 100
+    }
+  }
 };
